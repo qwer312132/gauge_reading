@@ -7,7 +7,7 @@ const App3 = () => {
   const [text, setText] = useState(null);
 
   const postMessage = () => {
-    fetch('http://127.0.0.1:8000/backend/my-view/', {
+    fetch('http://127.0.0.1:8000/api/MyData/', {
       method: 'POST',
       headers: {
         // 'X-CSRFToken': 'SDJpbMYXkmiDwhVWP7agkbo4dDVzNdIe',

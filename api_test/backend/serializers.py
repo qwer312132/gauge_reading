@@ -1,4 +1,6 @@
 from rest_framework import serializers
-
-class MyDataSerializer(serializers.Serializer):
-    data = serializers.CharField(max_length=100)
+from .models import MyData
+class MyDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MyData
+        fields = '__all__'
