@@ -30,14 +30,15 @@ const App3 = () => {
 
   const postImage = () => {
     const formData = new FormData();
+    formData.append("data", text)
     for (let i = 0; i < images?.length; i++) {
-      formData.append("image", images[i].url);
+      formData.append("image", images[i].file);
     }
     fetch("http://127.0.0.1:8000/api/MyData/", {
       method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      // headers: {
+      //   "Content-Type": "multipart/form-data",
+      // },
       body: formData,
     })
       .then((response) => response.json())
@@ -54,6 +55,7 @@ const App3 = () => {
       return {
         name: file.name,
         url: URL.createObjectURL(file),
+        file:file,
       };
     });
     setImages(images);
