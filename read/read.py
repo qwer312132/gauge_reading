@@ -3,7 +3,7 @@ import numpy as np
 import itertools
 
 
-def version2_distance(matrix):
+def version2_distance(matrix, center_point):
     ones_positions = [(i, j) for i, row in enumerate(matrix) for j, value in enumerate(row) if value == 1]
     max_points2 = ones_positions[0]
     min_points2 = ones_positions[0]
@@ -15,7 +15,13 @@ def version2_distance(matrix):
         if ones_positions[i][0] < min_points2[0] or (ones_positions[i][0] == min_points2[0] and ones_positions[i][1] < min_points2[1]):
             min_points2 = ones_positions[i]
             
-    return max_points2,min_points2
+    if np.linalg.norm(max_points2 - center_point) > np.linalg.norm(min_points2 - center_point):
+        return max_points2
+    else:
+        return min_points2
+            
+    
+        
         
     
 def distance(point1, point2):
@@ -80,38 +86,55 @@ image = cv2.imread(image_path)  # 保持原始通道数，不进行颜色转换
 mask = cv2.resize(mask, (mask.shape[1]//4, mask.shape[0]//4))
 image = cv2.resize(image, (image.shape[1]//4, image.shape[0]//4))
 
+# 转换为灰度图像
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# 使用霍夫圆变换检测圆盘
+circles = cv2.HoughCircles(
+    gray, cv2.HOUGH_GRADIENT, dp=1, minDist=80, param1=50, param2=30, minRadius=50, maxRadius=0
+)
+
+if circles is not None:
+    circle = circles[0][0]  # 提取第一个找到的圆
+    x, y, radius = map(int, circle)
+    # 根据检测到的圆心和半径切割圆盘
+    disk = image[y - radius : y + radius, x - radius : x + radius]
+
+    center_point = np.array([y, x])
+    print("Center point:", center_point)
+    
+else:
+    print("No circle detected.")
+
+
 # 将mask中小于255的像素值设为0，大于等于255的像素值设为1
 mask = np.where(mask < 255, 0, 1)
 
-min_points2,max_points2 = version2_distance(mask)
-print("Max Points:", max_points2)
-print("Min Points:", min_points2)
-        
+pointer_head = version2_distance(mask, center_point)
+print("Pointer head:", pointer_head)
 # max_points = find_max_distance(mask)
 
 # print("Points:", max_points)
 
 start_ponit = np.array([586,377])
-center_point = np.array([456,378])
 end_point = np.array([457,511])
 
 
 # 调用函数计算水表读数
-reading = calculate_water_meter_reading(center_point, 0, 100, np.array([310,373]), start_ponit, end_point)
+reading = calculate_water_meter_reading(center_point, 0, 100, pointer_head, start_ponit, end_point)
 
 print("Water meter reading:", reading)
-
-
 
 # 创建一个窗口并设置鼠标回调函数
 cv2.namedWindow('Image')
 cv2.setMouseCallback('Image', mouse_callback)
 
-cv2.circle(image, (max_points2[1], max_points2[0]), 3, (0, 0, 255), -1)
+
 
 # 在图像上绘制带箭头的线
-cv2.arrowedLine(image, (center_point[1],center_point[0]), (max_points2[1], max_points2[0]), (0, 0, 255), 2)  # 用红色绘制带箭头的线
+cv2.arrowedLine(image, (center_point[1],center_point[0]), (pointer_head[1], pointer_head[0]), (0, 0, 255), 2)  # 用红色绘制带箭头的线
 
+cv2.circle(image, (pointer_head[1], pointer_head[0]), 3, (0, 0, 255), -1) #  红色圆点
 
 cv2.circle(image, (center_point[1],center_point[0]), 3, (0, 0, 0), -1)  # 黑色圆点   
  
