@@ -2,23 +2,22 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import MyDataSerializer
 from .models import MyData
-
-# @api_view(['POST'])
-# def my_view(request):
-#     serializer = MyDataSerializer(data=request.data)
-#     if serializer.is_valid():
-#         validated_data = serializer.validated_data
-#         data = validated_data['data']
-#         my_data = MyData(data=data)
-#         my_data.save()
-#         return Response({'message': 'POST request received and data saved'})
-#     else:
-#         return Response(serializer.errors, status=400)
-# Create your views here.
 from rest_framework import viewsets
-
-
+from rest_framework.response import Response
+from rest_framework import status
+import cv2
+import os
+from read.read import read
 # Create your views here.
 class MyViewSet(viewsets.ModelViewSet):
     queryset = MyData.objects.all()
     serializer_class = MyDataSerializer
+    # def list(self, request):
+    #     return Response({'test':'test'},status=status.HTTP_200_OK, content_type = 'application/json')
+    def list(self, request):
+        # Retrieve the newest object based on timestamp_field
+        newest_object = MyData.objects.latest('id')
+        print(type(newest_object))
+        imagename = str(newest_object.image)
+        print(imagename)
+        return Response({'data':read(imagename,'read/test_masks.png')},status=status.HTTP_200_OK, content_type = 'application/json')
