@@ -7,4 +7,5 @@ api
 http://127.0.0.1:8000/api/MyData/
 
 frontend
+npm install react-scripts
 npm start
