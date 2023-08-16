@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component } from "react";
 
 class CameraApp extends Component {
   constructor(props) {
@@ -91,12 +91,13 @@ class CameraApp extends Component {
       });
   };
 
-  getData = (gaugeData) => {
-    fetch("http://localhost:3000/") //等API做好 要改
+  getData = () => {
+    fetch("http://127.0.0.1:8000/api/MyData/") //等API做好 要改
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        gaugeData = data;
+        // this.gaugeData = data.data;
+        this.setState({ gaugeData: data.data });
       })
       .catch((error) => {
         console.error("Error getting backend data:", error);
@@ -108,7 +109,7 @@ class CameraApp extends Component {
     return (
       <div>
         <h1>Camera Capture</h1>
-        <button onClick={this.getData(gaugeData)}>Get Data</button>
+        <button onClick={this.getData}>Get Data</button>
         <a>{gaugeData}</a>
         <video ref={this.videoRef} autoPlay playsInline muted />
         <div>
