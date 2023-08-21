@@ -6,7 +6,6 @@ class CameraApp extends Component {
     this.state = {
       cameraStream: null,
       intervalId: null,
-      photos: [],
       gaugeData: "尚未取得資料",
     };
     this.videoRef = React.createRef();
@@ -55,7 +54,7 @@ class CameraApp extends Component {
   }
 
   takePhoto = () => {
-    const { cameraStream, photos } = this.state;
+    const { cameraStream } = this.state;
 
     if (cameraStream) {
       const video = this.videoRef.current;
@@ -66,37 +65,35 @@ class CameraApp extends Component {
         .getContext("2d")
         .drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const photoUrl = canvas.toDataURL("image/png");
-      this.setState({ photos: [...photos, photoUrl] });
-      console.log("photo:", photoUrl);
-      this.postPhoto(photoUrl);
+      canvas.toBlob((blob) => {
+        const imageFile = new File([blob], 'frame.jpg', { type: 'image/jpeg' });
+        console.log(imageFile)
+        const formData = new FormData();
+        formData.append("data", "frame")
+        formData.append("image", imageFile);
+        fetch("http://127.0.0.1:8000/api/MyData/", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            if (response.ok) {
+              console.log("upload photo success");
+            } else {
+              console.error("upload photo failed");
+            }
+          })
+          .catch((error) => {
+            console.error("Error uploading photo:", error);
+          });
+      }, "image/jpeg");
     }
   };
 
-  postPhoto = (photo) => {
-    const formData = new FormData();
-    formData.append("photo", photo);
-
-    fetch("http://localhost:3000/", {
-      //等API做好 要改
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((success) => {
-        console.log("Upload photo to backend success:", success);
-      })
-      .catch((error) => {
-        console.error("Error uploading photo to backend :", error);
-      });
-  };
-
   getData = () => {
-    fetch("http://127.0.0.1:8000/api/MyData/") //等API做好 要改
+    fetch("http://127.0.0.1:8000/api/MyData/") 
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        // this.gaugeData = data.data;
         this.setState({ gaugeData: data.data });
       })
       .catch((error) => {
@@ -105,18 +102,15 @@ class CameraApp extends Component {
   };
 
   render() {
-    const { photos, gaugeData } = this.state;
+    const { gaugeData } = this.state;
     return (
       <div>
         <h1>Camera Capture</h1>
-        <button onClick={this.getData}>Get Data</button>
-        <a>{gaugeData}</a>
-        <video ref={this.videoRef} autoPlay playsInline muted />
         <div>
-          {photos.map((photo, index) => (
-            <img key={index} src={photo} alt={`Photo ${index}`} />
-          ))}
+          <button onClick={this.getData}>Get Data</button>
+          <a>{gaugeData}</a>
         </div>
+        <video ref={this.videoRef} autoPlay playsInline muted />
       </div>
     );
   }
