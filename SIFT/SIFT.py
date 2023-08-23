@@ -1,10 +1,8 @@
 import cv2 
 import numpy as np
-for i in range(2,10):
-    print(i)
-
-    image1 = cv2.imread("(1).jpg")
-    image2 = cv2.imread("("+str(i)+").jpg")
+def SIFT(photo_name):
+    image1 = cv2.imread("reference.jpg")
+    image2 = cv2.imread(str(photo_name)+".jpg")
     height,weight= image1.shape[:2]
     sift = cv2.SIFT_create(nfeatures=500,  sigma=1.8 )
     keypoints1, descriptors1 = sift.detectAndCompute(image1, None)
@@ -22,4 +20,10 @@ for i in range(2,10):
         sift_after = cv2.warpPerspective( image2,  h, (image1.shape[1], image1.shape[0]))
     except:
         sift_after=np.zeros((height,weight,3), np.uint8)
-    cv2.imwrite('sift_('+str(i)+').jpg', sift_after)
+    cv2.imwrite('sift_'+str(photo_name)+'.jpg', sift_after)
+
+
+for i in range(1,9):
+    print('frame_'+str(i))
+    SIFT('frame_'+str(i))
+
