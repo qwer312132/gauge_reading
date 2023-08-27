@@ -7,6 +7,7 @@ class CameraApp extends Component {
       cameraStream: null,
       intervalId: null,
       gaugeData: "尚未取得資料",
+      photoNum: 0,
     };
     this.videoRef = React.createRef();
   }
@@ -54,8 +55,7 @@ class CameraApp extends Component {
   }
 
   takePhoto = () => {
-    const { cameraStream } = this.state;
-
+    const { cameraStream, photoNum } = this.state;
     if (cameraStream) {
       const video = this.videoRef.current;
       const canvas = document.createElement("canvas");
@@ -66,10 +66,16 @@ class CameraApp extends Component {
         .drawImage(video, 0, 0, canvas.width, canvas.height);
 
       canvas.toBlob((blob) => {
-        const imageFile = new File([blob], 'frame.jpg', { type: 'image/jpeg' });
-        console.log(imageFile)
+        const imageFile = new File(
+          [blob],
+          "frame_" + photoNum.toString() + ".jpg",
+          {
+            type: "image/jpeg",
+          }
+        );
+        console.log(imageFile);
         const formData = new FormData();
-        formData.append("data", "frame")
+        formData.append("data", "frame_" + photoNum.toString());
         formData.append("image", imageFile);
         fetch("http://127.0.0.1:8000/api/MyData/", {
           method: "POST",
@@ -78,6 +84,7 @@ class CameraApp extends Component {
           .then((response) => {
             if (response.ok) {
               console.log("upload photo success");
+              this.setState({ photoNum: photoNum + 1 });
             } else {
               console.error("upload photo failed");
             }
@@ -90,7 +97,7 @@ class CameraApp extends Component {
   };
 
   getData = () => {
-    fetch("http://127.0.0.1:8000/api/MyData/") 
+    fetch("http://127.0.0.1:8000/api/MyData/")
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
