@@ -20,4 +20,4 @@ class MyViewSet(viewsets.ModelViewSet):
         print(type(newest_object))
         imagename = str(newest_object.image)
         print(imagename)
-        return Response({'data':read(imagename,'read/test_masks.png')},status=status.HTTP_200_OK, content_type = 'application/json')
+        return Response({'data':read(imagename)},status=status.HTTP_200_OK, content_type = 'application/json')

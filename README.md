@@ -12,3 +12,13 @@ frontend
 npm install react-scripts
 
 npm start
+
+maskrcnn
+conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+conda install -c conda-forge pycocotools
+pip install opencv-python
+
+django
+pip install Django
+pip install djangorestframework
+pip install django-cors-headers
