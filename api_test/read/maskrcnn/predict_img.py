@@ -17,7 +17,7 @@ path = "./PennFudanPed/needletest"
 
 
 def eval_show(img):
-    img = cv2.resize(img,(400,400))
+    # img = cv2.resize(img,(len(img[0])//4,len(img)//4))
     transform1 = T.Compose([
         T.ToTensor(),  # range [0, 255] -> [0.0,1.0]
     ]

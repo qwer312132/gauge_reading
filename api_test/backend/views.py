@@ -17,7 +17,7 @@ class MyViewSet(viewsets.ModelViewSet):
     def list(self, request):
         # Retrieve the newest object based on timestamp_field
         newest_object = MyData.objects.latest('id')
-        print(type(newest_object))
+        # print(type(newest_object))
         imagename = str(newest_object.image)
         print(imagename)
         return Response({'data':read(imagename)},status=status.HTTP_200_OK, content_type = 'application/json')

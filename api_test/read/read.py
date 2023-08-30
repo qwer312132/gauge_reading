@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import itertools
 from read.maskrcnn.predict_img import eval_show
-
+from read.SIFT.SIFT import SIFT
 def version2_distance(matrix, center_point):
     ones_positions = [(i, j) for i, row in enumerate(matrix) for j, value in enumerate(row) if value == 1]
     print(matrix)
@@ -58,15 +58,16 @@ def angle_between_xy_vectors(vector1, vector2):
 
 def calculate_water_meter_reading(center, start_mark, end_mark, pointer_head, start, end):
     # 计算指针指向的角度
-    pointer_angle = angle_between_xy_vectors(start-center, pointer_head-center)
+    pointer_angle = angle_between_xy_vectors([-83,21], pointer_head-center)
     
     print(pointer_angle)
     # 计算开始位置到结束位置的角度
-    start_to_end_angle = angle_between_xy_vectors(start-center, end-center)
+    start_to_end_angle = angle_between_xy_vectors([-83,21], [-83,20])
     print(start_to_end_angle)
     # 计算水表读数
     water_meter_reading = (pointer_angle / start_to_end_angle) * (end_mark - start_mark) + start_mark
-
+    print("vector")
+    print(start-center,end-center)
     return water_meter_reading
 
 
@@ -76,13 +77,15 @@ def mouse_callback(event, x, y, flags, param):
         print("Clicked coordinates: ({}, {})".format(x, y))
 
 def read(image_path):
-    import os
-    cwd = os.getcwd()
-    print(cwd)
+    # import os
+    # cwd = os.getcwd()
+    # print(cwd)
     # 读取PNG图像
     # image_path = 'test.jpg'
     image = cv2.imread(image_path)  # 保持原始通道数，不进行颜色转换
     # mask_path = 'test_masks.png'
+    image = SIFT(image)
+    image = cv2.resize(image,(image.shape[1]//4, image.shape[0]//4))
     mask,center_point = eval_show(image)
     # mask = cv2.imread(mask_path,cv2.IMREAD_GRAYSCALE)  # 保持原始通道数，不进行颜色转换
     # print(mask)
@@ -99,7 +102,7 @@ def read(image_path):
 
 
     # mask = cv2.resize(mask, (mask.shape[1]//4, mask.shape[0]//4))
-    image = cv2.resize(image, (400, 400))
+    # image = cv2.resize(image, (mask.shape[0], mask.shape[1]))
 
     # 转换为灰度图像
     # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -132,12 +135,12 @@ def read(image_path):
 
     # print("Points:", max_points)
 
-    start_ponit = np.array([111,200])
-    end_point = np.array([111,194])
+    start_ponit = np.array([68,221])
+    end_point = np.array([68,220])
 
 
     # 调用函数计算水表读数
-    reading = calculate_water_meter_reading(center_point, 0, 100, pointer_head, start_ponit, end_point)
+    reading = calculate_water_meter_reading(center_point, 0, 12, pointer_head, start_ponit, end_point)
 
     print("Water meter reading:", reading)
 
