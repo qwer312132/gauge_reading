@@ -55,11 +55,11 @@ if __name__ == '__main__':
         image = eval_show(color_image)
         end = time.time()
         print(end-start)
-        cv2.namedWindow('RealSense', cv2.WINDOW_NORMAL)
-        cv2.imshow('RealSense', image)
-        key = cv2.waitKey(0) & 0xFF
-        if key == ord('q'):
-            break
-    cv2.destroyAllWindows()
+    #     cv2.namedWindow('RealSense', cv2.WINDOW_NORMAL)
+    #     cv2.imshow('RealSense', image)
+    #     key = cv2.waitKey(0) & 0xFF
+    #     if key == ord('q'):
+    #         break
+    # cv2.destroyAllWindows()
 
 

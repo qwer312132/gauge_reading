@@ -76,13 +76,13 @@ def mouse_callback(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         print("Clicked coordinates: ({}, {})".format(x, y))
 
-def read(image_path):
+def read(image):
     # import os
     # cwd = os.getcwd()
     # print(cwd)
     # 读取PNG图像
     # image_path = 'test.jpg'
-    image = cv2.imread(image_path)  # 保持原始通道数，不进行颜色转换
+    #image = cv2.imread(image_path)  # 保持原始通道数，不进行颜色转换
     # mask_path = 'test_masks.png'
     image = SIFT(image)
     image = cv2.resize(image,(image.shape[1]//4, image.shape[0]//4))
@@ -146,26 +146,26 @@ def read(image_path):
 
     # 创建一个窗口并设置鼠标回调函数
     
-    cv2.namedWindow('Image')
-    cv2.setMouseCallback('Image', mouse_callback)
+    # cv2.namedWindow('Image')
+    # cv2.setMouseCallback('Image', mouse_callback)
 
 
 
-    # 在图像上绘制带箭头的线
-    cv2.arrowedLine(image, (center_point[1],center_point[0]), (pointer_head[1], pointer_head[0]), (0, 0, 255), 2)  # 用红色绘制带箭头的线
+    # # 在图像上绘制带箭头的线
+    # cv2.arrowedLine(image, (center_point[1],center_point[0]), (pointer_head[1], pointer_head[0]), (0, 0, 255), 2)  # 用红色绘制带箭头的线
 
-    cv2.circle(image, (pointer_head[1], pointer_head[0]), 3, (0, 0, 255), -1) #  红色圆点
+    # cv2.circle(image, (pointer_head[1], pointer_head[0]), 3, (0, 0, 255), -1) #  红色圆点
 
-    cv2.circle(image, (center_point[1],center_point[0]), 3, (0, 0, 0), -1)  # 黑色圆点   
+    # cv2.circle(image, (center_point[1],center_point[0]), 3, (0, 0, 0), -1)  # 黑色圆点   
     
-    cv2.circle(image, (start_ponit[1], start_ponit[0]), 3, (255, 0, 0), -1)  #  藍色圆点
+    # cv2.circle(image, (start_ponit[1], start_ponit[0]), 3, (255, 0, 0), -1)  #  藍色圆点
 
-    cv2.circle(image, (end_point[1], end_point[0]), 3, (0, 255, 0), -1)  #  绿色圆点
+    # cv2.circle(image, (end_point[1], end_point[0]), 3, (0, 255, 0), -1)  #  绿色圆点
 
-    cv2.imshow('Image', image)
+    # cv2.imshow('Image', image)
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     
     return reading
 # print(read("maskrcnn\\PennFudanPed\\needletest\\testclock.jpg","test_masks.png"))

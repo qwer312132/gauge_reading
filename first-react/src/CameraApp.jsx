@@ -85,6 +85,10 @@ class CameraApp extends Component {
             if (response.ok) {
               console.log("upload photo success");
               this.setState({ photoNum: photoNum + 1 });
+              response.json().then((data) => {
+                console.log(data)
+                // this.setState({ gaugeData: data });
+              });
             } else {
               console.error("upload photo failed");
             }
