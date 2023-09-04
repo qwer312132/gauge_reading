@@ -55,7 +55,7 @@ class CameraApp extends Component {
   }
 
   takePhoto = () => {
-    const { cameraStream, photoNum } = this.state;
+    const { cameraStream, photoNum, gaugeData }= this.state;
     if (cameraStream) {
       const video = this.videoRef.current;
       const canvas = document.createElement("canvas");
@@ -87,7 +87,10 @@ class CameraApp extends Component {
               this.setState({ photoNum: photoNum + 1 });
               response.json().then((data) => {
                 console.log(data)
-                // this.setState({ gaugeData: data });
+                // data = JSON.stringify(data) 
+                console.log(data)
+
+                this.setState({ gaugeData: data.message });
               });
             } else {
               console.error("upload photo failed");
