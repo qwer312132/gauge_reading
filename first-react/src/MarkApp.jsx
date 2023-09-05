@@ -1,6 +1,4 @@
 import React, { Component } from "react";
-import { useState, useRef, useEffect } from "react";
-import Button from "react-bootstrap/Button";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Modal from "react-modal";
 
@@ -10,34 +8,14 @@ class MarkApp extends Component {
     this.state = {
       text: null,
       images: null,
-      imageElements: [],
       isModalOpen: false,
-      compressedImages: [], // 用于存储多张压缩后的图片
-      currentImageIndex: 0, // 用于跟踪当前显示的图片
+      compressedImages: [], // 存壓縮後的圖片
+      currentImageIndex: 0, // 當前圖片索引
+      mouseCoordinates: [], // 存每個圖片的座標
     };
     this.videoRef = React.createRef();
     this.fileInputRef = React.createRef();
   }
-
-  postMessage = () => {
-    fetch("http://127.0.0.1:8000/api/MyData/", {
-      method: "POST",
-      headers: {
-        // 'X-CSRFToken': 'SDJpbMYXkmiDwhVWP7agkbo4dDVzNdIe',
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: this.text,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
 
   postImage = () => {
     const formData = new FormData();
@@ -59,28 +37,6 @@ class MarkApp extends Component {
       .catch((error) => {
         console.error("Error:", error);
       });
-  };
-
-  handleUpload = (e) => {
-    const images = [...e.target.files].map((file) => {
-      return {
-        name: file.name,
-        url: URL.createObjectURL(file),
-        file: file,
-      };
-    });
-    this.setState({ images: images });
-    for (let i = 0; i < images?.length; i++) {
-      this.imageElements.push(
-        <img
-          src={images[i].url}
-          alt=""
-          style={{
-            width: "100px",
-          }}
-        />
-      );
-    }
   };
 
   label = () => {
@@ -137,16 +93,16 @@ class MarkApp extends Component {
     if (currentImageIndex < compressedImages.length - 1) {
       this.setState({ currentImageIndex: currentImageIndex + 1 });
     }
-    console.log(currentImageIndex);
+    console.log(this.state.currentImageIndex);
   };
 
   handlePreviousImage = () => {
-    const { currentImageIndex, compressedImages } = this.state;
+    const { currentImageIndex } = this.state;
 
     if (currentImageIndex > 0) {
       this.setState({ currentImageIndex: currentImageIndex - 1 });
     }
-    console.log(currentImageIndex);
+    console.log(this.state.currentImageIndex);
   };
 
   closeModal = () => {
@@ -155,15 +111,40 @@ class MarkApp extends Component {
     this.setState({ isModalOpen: false });
   };
 
+  handleImageClick = (e) => {
+    const rect = e.target.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const { mouseCoordinates, currentImageIndex } = this.state;
+    const updatedCoordinates = [...mouseCoordinates];
+    if (!updatedCoordinates[currentImageIndex]) {
+      updatedCoordinates[currentImageIndex] = [];
+    }
+    updatedCoordinates[currentImageIndex].push({ x: mouseX, y: mouseY });
+
+    this.setState({ mouseCoordinates: updatedCoordinates });
+  };
+
+  handleDeleteCoordinate = (indexToDelete) => {
+    const { mouseCoordinates, currentImageIndex } = this.state;
+    const updatedCoordinates = [...mouseCoordinates];
+    updatedCoordinates[currentImageIndex] = updatedCoordinates[
+      currentImageIndex
+    ].filter((_, index) => index !== indexToDelete);
+
+    this.setState({ mouseCoordinates: updatedCoordinates });
+  };
+
   render() {
     const {
-      text,
-      images,
-      imageElements,
+      // text,
+      // images,
       isModalOpen,
       compressedImages,
       currentImageIndex,
-      fileInputRef,
+      mouseCoordinates,
+      // fileInputRef,
     } = this.state;
     return (
       <div>
@@ -177,49 +158,50 @@ class MarkApp extends Component {
           style={{ display: "none" }}
           multiple // 允許選擇多個文件
         />
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => this.setState({ text: e.target.value })}
-        ></input>
-        <Button onClick={this.postMessage}>post</Button>
-        <div className="data-display">
-          {text === null ? "目前還有沒有資料" : "目前輸入的資料為 " + text}
-        </div>
-        <div>
-          <label htmlFor="file-input">
-            <input
-              type="file"
-              multiple
-              id="file-input"
-              accept="image/*"
-              onChange={this.handleUpload}
-              style={{ display: "none" }}
-            />
-            <Button as="span">Upload Images</Button>
-            {/* <Button as="span" style={{ display: "inline" }} onClick={handleRemove}>
-          Remove Images
-        </Button> */}
-            <div>{imageElements}</div>
-          </label>
-        </div>
-        <Button onClick={this.postImage}>Submit</Button>
         {/* 模態框 */}
-        <Modal isOpen={isModalOpen} onRequestClose={this.closeModal}>
+        <Modal
+          isOpen={isModalOpen}
+          onRequestClose={this.closeModal}
+          ariaHideApp={false}
+        >
           {/* 顯示當前索引的壓縮圖像 */}
-          {compressedImages[currentImageIndex] && (
-            <img
-              src={compressedImages[currentImageIndex]}
-              alt={`壓縮後 ${currentImageIndex}`}
-            />
-          )}
+          <div className="image-container">
+            {compressedImages[currentImageIndex] && (
+              <img
+                src={compressedImages[currentImageIndex]}
+                alt={`壓縮後 ${currentImageIndex}`}
+                onClick={this.handleImageClick}
+              />
+            )}
+            {mouseCoordinates[currentImageIndex] &&
+              mouseCoordinates[currentImageIndex].map((coordinate, index) => (
+                <div
+                  key={index}
+                  className="red-dot"
+                  style={{
+                    left: coordinate.x,
+                    top: coordinate.y,
+                  }}
+                ></div>
+              ))}
+          </div>
 
           {/* 添加“下一張”和“前一張”按鈕 */}
           <div>
             <button onClick={this.handlePreviousImage}>前一張</button>
             <button onClick={this.handleNextImage}>下一張</button>
           </div>
-
+          <div className="coordinates-display">
+            {mouseCoordinates[currentImageIndex] &&
+              mouseCoordinates[currentImageIndex].map((coordinate, index) => (
+                <div key={index}>
+                  X: {coordinate.x}, Y: {coordinate.y}
+                  <button onClick={() => this.handleDeleteCoordinate(index)}>
+                    删除
+                  </button>
+                </div>
+              ))}
+          </div>
           <button onClick={this.closeModal}>關閉</button>
         </Modal>
       </div>
