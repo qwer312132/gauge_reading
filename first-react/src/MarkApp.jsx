@@ -7,12 +7,11 @@ class MarkApp extends Component {
     super(props);
     this.state = {
       text: null,
-      images: null,
+      images: [],
       isModalOpen: false,
       compressedImages: [], // 存壓縮後的圖片
       currentImageIndex: 0, // 當前圖片索引
       pointerCoordinates: [], // 存每個圖片的指針座標
-      // discCoordinates: [], // 存每個圖片的圓盤座標
       scaleStartCoordinate: null, // 存圖片的起始座標
       scaleEndCoordinate: null, // 存圖片的結束座標
       scaleStartValue: null,
@@ -26,28 +25,6 @@ class MarkApp extends Component {
     this.fileInputRef = React.createRef();
   }
 
-  postImage = () => {
-    const formData = new FormData();
-    formData.append("data", this.text);
-    for (let i = 0; i < this.images?.length; i++) {
-      formData.append("image", this.images[i].file);
-    }
-    fetch("http://127.0.0.1:8000/api/MyData/", {
-      method: "POST",
-      // headers: {
-      //   "Content-Type": "multipart/form-data",
-      // },
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
-
   label = () => {
     if (this.fileInputRef.current) {
       // 觸發文件選擇操作
@@ -60,11 +37,23 @@ class MarkApp extends Component {
   handleFileChange = (event) => {
     const files = event.target.files;
 
+    // for (let i = 0; i < files.length; i++) {
+    //   const targetSize = 400;
+    //   const aspectRatio = files[i].width / files[i].height;
+    //   files[i].width = targetSize;
+    //   files[i].height = targetSize / aspectRatio;
+    // }
+    // console.log("compressed images:", files);感覺是錯的
+
+    this.setState({ images: files });
     // 遍歷每個文件並進行處理
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+
       const reader = new FileReader();
       const { compressedImages } = this.state;
+
+      //直接上傳原圖
 
       reader.onload = (e) => {
         const img = new Image();
@@ -75,17 +64,20 @@ class MarkApp extends Component {
           const ctx = canvas.getContext("2d");
 
           // 將畫布大小設置為 200x200 像素
-          const targetSize = 400;
-          const aspectRatio = img.width / img.height;
-          canvas.width = targetSize;
-          canvas.height = targetSize / aspectRatio;
+          // const targetSize = 400;
+          // const aspectRatio = img.width / img.height;
+          // canvas.width = targetSize;
+          // canvas.height = targetSize / aspectRatio;
 
+          canvas.width = img.width;
+          canvas.height = img.height;
           // 在畫布上繪製壓縮後的圖像
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
           // 將壓縮後的圖像數據添加到數組中
-          compressedImages.push(canvas.toDataURL("image/jpeg"));
-
+          // compressedImages.push(canvas.toDataURL("image/jpeg"));
+          //改成png;base64
+          compressedImages.push(canvas.toDataURL("image/png"));
           // 如果處理完所有文件，將圖像數組存儲在狀態中並打開模態框
           if (compressedImages.length === files.length) {
             this.setState({ compressedImages, isModalOpen: true });
@@ -117,7 +109,6 @@ class MarkApp extends Component {
       compressedImages: [],
       currentImageIndex: 0,
       pointerCoordinates: [], // 存每個圖片的指針座標
-      // discCoordinates: [], // 存每個圖片的圓盤座標
       scaleStartCoordinate: null, // 存圖片的起始座標
       scaleEndCoordinate: null, // 存圖片的結束座標
       markClass: null, // 存每個圖片的標記類別 (1:起始刻度, 2:結束刻度, 3:指針, 4:圓盤)
@@ -129,7 +120,58 @@ class MarkApp extends Component {
   };
 
   submitModal = () => {
-    //上傳未完成
+    const {
+      compressedImages,
+      images,
+      pointerCoordinates,
+      scaleStartCoordinate,
+      scaleEndCoordinate,
+      scaleStartValue,
+      scaleEndValue,
+      discFrameStartCoordinates,
+      discFrameEndCoordinates,
+    } = this.state;
+    //上傳的資料型態
+    const formData = new FormData();
+    formData.append("data", "user_mark");
+    // formData.append("image", images[0]);
+    for (let i = 0; i < compressedImages?.length; i++) {
+      formData.append(`image${i}`, images[i]);
+      console.log(`image${i}:`, images[i]);
+    }
+    for (let i = 0; i < pointerCoordinates?.length; i++) {
+      formData.append("pointerCoordinates", pointerCoordinates[i]);
+    }
+    formData.append("scaleStartCoordinate", scaleStartCoordinate);
+    formData.append("scaleEndCoordinate", scaleEndCoordinate);
+    formData.append("scaleStartValue", scaleStartValue);
+    formData.append("scaleEndValue", scaleEndValue);
+    for (let i = 0; i < discFrameStartCoordinates?.length; i++) {
+      formData.append(
+        "discFrameStartCoordinates",
+        discFrameStartCoordinates[i]
+      );
+    }
+    for (let i = 0; i < discFrameEndCoordinates?.length; i++) {
+      formData.append("discFrameEndCoordinates", discFrameEndCoordinates[i]);
+    }
+    console.log("formdata:", formData);
+    fetch("http://127.0.0.1:8000/api/MyData/", {
+      method: "POST",
+      headers: {
+        // 這裡需要設置 Content-Type 為 undefined，以便自動生成 multipart/form-data
+        // "Content-Type": undefined,
+      },
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        alert("上傳成功");
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
 
     this.closeModal();
   };
