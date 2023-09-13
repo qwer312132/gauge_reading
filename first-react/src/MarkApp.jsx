@@ -140,7 +140,7 @@ class MarkApp extends Component {
       console.log(`image${i}:`, images[i]);
     }
     for (let i = 0; i < pointerCoordinates?.length; i++) {
-      formData.append("pointerCoordinates", pointerCoordinates[i]);
+      formData.append(`pointerCoordinates${i}`, pointerCoordinates[i]);
     }
     formData.append("scaleStartCoordinate", scaleStartCoordinate);
     formData.append("scaleEndCoordinate", scaleEndCoordinate);
@@ -148,12 +148,15 @@ class MarkApp extends Component {
     formData.append("scaleEndValue", scaleEndValue);
     for (let i = 0; i < discFrameStartCoordinates?.length; i++) {
       formData.append(
-        "discFrameStartCoordinates",
+        `discFrameStartCoordinates${i}`,
         discFrameStartCoordinates[i]
       );
     }
     for (let i = 0; i < discFrameEndCoordinates?.length; i++) {
-      formData.append("discFrameEndCoordinates", discFrameEndCoordinates[i]);
+      formData.append(
+        `discFrameEndCoordinates${i}`,
+        discFrameEndCoordinates[i]
+      );
     }
     console.log("formdata:", formData);
     fetch("http://127.0.0.1:8000/api/MyData/", {
