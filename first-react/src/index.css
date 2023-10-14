@@ -11,15 +11,62 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.no-wrap-div {
+  white-space: nowrap;
+}
+
+.coordinates-display {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .image-container {
   position: relative;
 }
 
-.red-dot {
+.dot {
   position: absolute;
   width: 5px;
   height: 5px;
-  background-color: #ff1493;
   border-radius: 50%;
-  border: 1px solid black; /* 添加黑線 */
+  border: 1px solid black;
+}
+.red-dot {
+  background-color: red;
+}
+
+.yellow-dot {
+  background-color: yellow;
+}
+.pink-dot {
+  background-color: #ff1493;
+}
+.blue-dot {
+  background-color: blue;
+}
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin: 5px;
+  cursor: pointer;
+}
+.red-button {
+  background-color: red;
+  color: white;
+}
+
+.yellow-button {
+  background-color: yellow;
+  color: black;
+}
+
+.pink-button {
+  background-color: #ff1493;
+  color: white;
+}
+.blue-button {
+  background-color: blue;
+  color: white;
 }
