@@ -20,6 +20,7 @@ class MarkApp extends Component {
       discFrameClick: 1, //1為畫起始點，2為畫結束點
       discFrameStartCoordinates: [],
       discFrameEndCoordinates: [],
+      getImage: [],
     };
     this.videoRef = React.createRef();
     this.fileInputRef = React.createRef();
@@ -111,6 +112,8 @@ class MarkApp extends Component {
       pointerCoordinates: [], // 存每個圖片的指針座標
       scaleStartCoordinate: null, // 存圖片的起始座標
       scaleEndCoordinate: null, // 存圖片的結束座標
+      scaleStartValue: null,
+      scaleEndValue: null,
       markClass: null, // 存每個圖片的標記類別 (1:起始刻度, 2:結束刻度, 3:指針, 4:圓盤)
       discFrameClick: 1, //1為畫起始點，2為畫結束點
       discFrameStartCoordinates: [],
@@ -133,7 +136,7 @@ class MarkApp extends Component {
     } = this.state;
     //上傳的資料型態
     const formData = new FormData();
-    formData.append("data", "user_mark");
+    formData.append("data", "user_mark2");
     // formData.append("image", images[0]);
     for (let i = 0; i < compressedImages?.length; i++) {
       formData.append(`image${i}`, images[i]);
@@ -167,9 +170,14 @@ class MarkApp extends Component {
       },
       body: formData,
     })
-      .then((response) => response.json())
+      .then((response) => {
+        return response.json();
+      })
       .then((data) => {
-        console.log(data);
+        console.log("data:", data);
+        this.setState({ getImage: data.image });
+        console.log("getImage length:", this.state.getImage.length);
+        console.log("getImage:", this.state.getImage);
         alert("上傳成功");
       })
       .catch((error) => {
@@ -289,6 +297,7 @@ class MarkApp extends Component {
       scaleEndValue,
       discFrameStartCoordinates,
       discFrameEndCoordinates,
+      getImage,
     } = this.state;
     const isFirstImage = currentImageIndex === 0;
     const isLastImage = currentImageIndex === compressedImages.length - 1;
@@ -306,6 +315,12 @@ class MarkApp extends Component {
           style={{ display: "none" }}
           multiple
         />
+        {getImage &&
+          getImage.map((image, index) => (
+            <div key={index}>
+              <img src={`data:image/jpeg;base64,${image}`} alt="getImage們" />
+            </div>
+          ))}
         <Modal
           isOpen={isModalOpen}
           onRequestClose={this.closeModal}
