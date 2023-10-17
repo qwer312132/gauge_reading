@@ -21,6 +21,7 @@ class MarkApp extends Component {
       discFrameStartCoordinates: [],
       discFrameEndCoordinates: [],
       getImage: [],
+      correctImageIndex: null, //儲存 正確的SAM候選圖片 的索引 !!未重製!!
     };
     this.videoRef = React.createRef();
     this.fileInputRef = React.createRef();
@@ -282,6 +283,27 @@ class MarkApp extends Component {
     }
   };
 
+  confirmSAM = () => {
+    const { correctImageIndex } = this.state;
+    const formData = new FormData();
+    formData.append("data", "user_mark2");
+    formData.append("correctImageIndex", correctImageIndex);
+    //!!未放API!!
+    fetch("", {
+      method: "POST",
+      headers: {},
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("data:", data);
+        alert("上傳成功");
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
   render() {
     const {
       // text,
@@ -298,6 +320,7 @@ class MarkApp extends Component {
       discFrameStartCoordinates,
       discFrameEndCoordinates,
       getImage,
+      correctImageIndex,
     } = this.state;
     const isFirstImage = currentImageIndex === 0;
     const isLastImage = currentImageIndex === compressedImages.length - 1;
@@ -315,9 +338,24 @@ class MarkApp extends Component {
           style={{ display: "none" }}
           multiple
         />
+        {correctImageIndex != null && (
+          <div>
+            我覺得第{correctImageIndex + 1}個是正確的SAM候選圖片
+            <button className="button" onClick={this.confirmSAM}>
+              確認
+            </button>
+          </div>
+        )}
+
         {getImage &&
           getImage.map((image, index) => (
             <div key={index}>
+              <button
+                onClick={() => this.setState({ correctImageIndex: index })}
+                className="button"
+              >
+                {index + 1}
+              </button>
               <img src={`data:image/jpeg;base64,${image}`} alt="getImage們" />
             </div>
           ))}
