@@ -21,20 +21,20 @@ class MyViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # 获取POST请求的数据
         data = request.data.get('data')
-        image = request.data.get('image')
-        print(str(image))
+        image = request.data.get('image0')
         # 调用read函数并设置gauge_data字段的值
         image_data = image.read()
         image_data2 = base64.b64encode(image_data).decode('utf-8')
         image_array = np.frombuffer(image_data, np.uint8)
         imagenumpy = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-        result = read(imagenumpy)
+        #計算指針刻度
+        # result = read(imagenumpy)
 
         # 创建MyData实例，并保存到数据库
-        my_data = MyData(data=data, image=image, gauge_data=result)
+        # my_data = MyData(data=data, image=image, gauge_data=result)
         # my_data.save()
 
-        return Response({'message': result,"image":type(image_data)}, status=status.HTTP_201_CREATED)
+        return Response({'message': 0,"image":[image_data2,image_data2]}, status=status.HTTP_201_CREATED)
     def list(self, request):
         # Retrieve the newest object based on timestamp_field
         newest_object = MyData.objects.latest('id')
