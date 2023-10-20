@@ -134,35 +134,42 @@ class MarkApp extends Component {
       scaleEndValue,
       discFrameStartCoordinates,
       discFrameEndCoordinates,
+
     } = this.state;
     //上傳的資料型態
     const formData = new FormData();
     formData.append("data", "user_mark2");
+    formData.append("imageLength", compressedImages.length);
     // formData.append("image", images[0]);
     for (let i = 0; i < compressedImages?.length; i++) {
       formData.append(`image${i}`, images[i]);
       console.log(`image${i}:`, images[i]);
     }
-    for (let i = 0; i < pointerCoordinates?.length; i++) {
-      formData.append(`pointerCoordinates${i}`, pointerCoordinates[i]);
-    }
-    formData.append("scaleStartCoordinate", scaleStartCoordinate);
-    formData.append("scaleEndCoordinate", scaleEndCoordinate);
+    // for (let i = 0; i < pointerCoordinates?.length; i++) {
+    //   formData.append(`pointerCoordinates${i}`, pointerCoordinates[i]);
+    // }
+    formData.append("scaleStartCoordinate", JSON.stringify(scaleStartCoordinate));
+    formData.append("scaleEndCoordinate",JSON.stringify(scaleEndCoordinate));
     formData.append("scaleStartValue", scaleStartValue);
     formData.append("scaleEndValue", scaleEndValue);
-    for (let i = 0; i < discFrameStartCoordinates?.length; i++) {
-      formData.append(
-        `discFrameStartCoordinates${i}`,
-        discFrameStartCoordinates[i]
-      );
-    }
-    for (let i = 0; i < discFrameEndCoordinates?.length; i++) {
-      formData.append(
-        `discFrameEndCoordinates${i}`,
-        discFrameEndCoordinates[i]
-      );
-    }
-    console.log("formdata:", formData);
+    formData.append("pointerCoordinates", JSON.stringify(pointerCoordinates));
+    formData.append("discFrameStartCoordinates", JSON.stringify(discFrameStartCoordinates));
+    formData.append("discFrameEndCoordinates", JSON.stringify(discFrameEndCoordinates));
+
+    
+    // for (let i = 0; i < discFrameStartCoordinates?.length; i++) {
+    //   formData.append(
+    //     `discFrameStartCoordinates${i}`,
+    //     discFrameStartCoordinates[i]
+    //   );
+    // }
+    // for (let i = 0; i < discFrameEndCoordinates?.length; i++) {
+    //   formData.append(
+    //     `discFrameEndCoordinates${i}`,
+    //     discFrameEndCoordinates[i]
+    //   );
+    // }
+    // console.log("formdata:", formData);
     fetch("http://127.0.0.1:8000/api/MyData/", {
       method: "POST",
       headers: {
@@ -175,11 +182,15 @@ class MarkApp extends Component {
         return response.json();
       })
       .then((data) => {
-        console.log("data:", data);
+        // console.log("data:", data);
         this.setState({ getImage: data.image });
-        console.log("getImage length:", this.state.getImage.length);
-        console.log("getImage:", this.state.getImage);
+        // console.log("getImage length:", this.state.getImage.length);
+        // console.log("getImage:", this.state.getImage);
         alert("上傳成功");
+        // 遍歷 FormData
+        for (let pair of formData.entries()) {
+          console.log(pair[0] + ': ' + pair[1]);
+        }
       })
       .catch((error) => {
         console.error("Error:", error);
