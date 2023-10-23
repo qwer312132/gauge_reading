@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from .models import MyData
+from .models import Maskrcnndata
 class MyDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyData
         fields = '__all__'
-class GaugedataSerializer(serializers.ModelSerializer):
+class MaskrcnndataSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MyData
+        model = Maskrcnndata
         fields = '__all__'

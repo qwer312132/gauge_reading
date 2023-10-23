@@ -1,2 +1,4 @@
 db.sqlite3
 api_test/images
+api_test/trainImage
+api_test/trainMask
