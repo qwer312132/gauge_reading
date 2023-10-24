@@ -21,7 +21,7 @@ class MarkApp extends Component {
       discFrameStartCoordinates: [],
       discFrameEndCoordinates: [],
       getImage: [],
-      correctImageIndex: null, //儲存 正確的SAM候選圖片 的索引 !!未重製!!
+      correctImageIndexs: [], //儲存 正確的SAM候選圖片 的索引 !!未重製!!
     };
     this.videoRef = React.createRef();
     this.fileInputRef = React.createRef();
@@ -134,12 +134,12 @@ class MarkApp extends Component {
       scaleEndValue,
       discFrameStartCoordinates,
       discFrameEndCoordinates,
-
     } = this.state;
     //上傳的資料型態
     const formData = new FormData();
-    formData.append("data", "user_mark2");
+    formData.append("operation", "user_mark2");
     formData.append("imageLength", compressedImages.length);
+
     // formData.append("image", images[0]);
     for (let i = 0; i < compressedImages?.length; i++) {
       formData.append(`image${i}`, images[i]);
@@ -148,15 +148,23 @@ class MarkApp extends Component {
     // for (let i = 0; i < pointerCoordinates?.length; i++) {
     //   formData.append(`pointerCoordinates${i}`, pointerCoordinates[i]);
     // }
-    formData.append("scaleStartCoordinate", JSON.stringify(scaleStartCoordinate));
-    formData.append("scaleEndCoordinate",JSON.stringify(scaleEndCoordinate));
+    formData.append(
+      "scaleStartCoordinate",
+      JSON.stringify(scaleStartCoordinate)
+    );
+    formData.append("scaleEndCoordinate", JSON.stringify(scaleEndCoordinate));
     formData.append("scaleStartValue", scaleStartValue);
     formData.append("scaleEndValue", scaleEndValue);
     formData.append("pointerCoordinates", JSON.stringify(pointerCoordinates));
-    formData.append("discFrameStartCoordinates", JSON.stringify(discFrameStartCoordinates));
-    formData.append("discFrameEndCoordinates", JSON.stringify(discFrameEndCoordinates));
+    formData.append(
+      "discFrameStartCoordinates",
+      JSON.stringify(discFrameStartCoordinates)
+    );
+    formData.append(
+      "discFrameEndCoordinates",
+      JSON.stringify(discFrameEndCoordinates)
+    );
 
-    
     // for (let i = 0; i < discFrameStartCoordinates?.length; i++) {
     //   formData.append(
     //     `discFrameStartCoordinates${i}`,
@@ -187,9 +195,10 @@ class MarkApp extends Component {
         // console.log("getImage length:", this.state.getImage.length);
         // console.log("getImage:", this.state.getImage);
         alert("上傳成功");
+        console.log("get image num:", data.image.size);
         // 遍歷 FormData
         for (let pair of formData.entries()) {
-          console.log(pair[0] + ': ' + pair[1]);
+          console.log(pair[0] + ": " + pair[1]);
         }
       })
       .catch((error) => {
@@ -293,14 +302,31 @@ class MarkApp extends Component {
       });
     }
   };
+  handleCorrectImageIndexs = (e) => {
+    const { correctImageIndexs } = this.state;
+    const index = e.target.innerHTML - 1;
+    //如果correctImageIndexs裡面的值沒有index，就放進去
+    if (!correctImageIndexs.includes(index)) {
+      correctImageIndexs.push(index);
+    } else {
+      //如果有，就刪掉
+      const indexToDelete = correctImageIndexs.indexOf(index);
+      correctImageIndexs.splice(indexToDelete, 1);
+    }
+    //分類
+    correctImageIndexs.sort((a, b) => a - b);
+    this.setState({
+      correctImageIndexs: correctImageIndexs,
+    });
+  };
 
-  confirmSAM = () => {
-    const { correctImageIndex } = this.state;
+  chooseBest = () => {
+    const { correctImageIndexs } = this.state;
     const formData = new FormData();
-    formData.append("data", "user_mark2");
-    formData.append("correctImageIndex", correctImageIndex);
+    formData.append("operation", "choose_best");
+    formData.append("correctImageIndexs", correctImageIndexs);
     //!!未放API!!
-    fetch("", {
+    fetch("http://127.0.0.1:8000/api/MyData/", {
       method: "POST",
       headers: {},
       body: formData,
@@ -331,7 +357,7 @@ class MarkApp extends Component {
       discFrameStartCoordinates,
       discFrameEndCoordinates,
       getImage,
-      correctImageIndex,
+      correctImageIndexs,
     } = this.state;
     const isFirstImage = currentImageIndex === 0;
     const isLastImage = currentImageIndex === compressedImages.length - 1;
@@ -349,20 +375,28 @@ class MarkApp extends Component {
           style={{ display: "none" }}
           multiple
         />
-        {correctImageIndex != null && (
-          <div>
-            我覺得第{correctImageIndex + 1}個是正確的SAM候選圖片
-            <button className="button" onClick={this.confirmSAM}>
-              確認
-            </button>
-          </div>
-        )}
+        {
+          //如果correctImageIndexs有不是空的
+          correctImageIndexs.length > 0 && (
+            <div>
+              我覺得{" "}
+              {
+                //  把correctImageIndexs拿出來用逗號隔開 及時更新
+                correctImageIndexs.map((index) => index + 1).join(",")
+              }{" "}
+              張圖片是最好的
+              <button className="button" onClick={this.chooseBest}>
+                確認
+              </button>
+            </div>
+          )
+        }
 
         {getImage &&
           getImage.map((image, index) => (
             <div key={index}>
               <button
-                onClick={() => this.setState({ correctImageIndex: index })}
+                onClick={this.handleCorrectImageIndexs}
                 className="button"
               >
                 {index + 1}
