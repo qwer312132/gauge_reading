@@ -8,6 +8,7 @@ from rest_framework import status
 import cv2
 import os
 from read.read import read
+from SAM.detect_mask import getmasks_bypoint
 import numpy as np
 # Create your views here.
 class MyViewSet(viewsets.ModelViewSet):
@@ -24,11 +25,18 @@ class MyViewSet(viewsets.ModelViewSet):
         image_data = image.read()
         image_array = np.frombuffer(image_data, np.uint8)
         imagenumpy = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        mask = getmasks_bypoint(image, 500, 1000)
+        cv2.imshow("image",mask[0])
+        cv2.waitKey(0)
+        cv2.imshow("image",mask[1])
+        cv2.waitKey(0)
+        cv2.imshow("image",mask[2])
+        cv2.destroyAllWindows()
         result = read(imagenumpy)
 
         # 创建MyData实例，并保存到数据库
         my_data = MyData(data=data, image=image, gauge_data=result)
-        my_data.save()
+        # my_data.save()
 
         return Response({'message': result}, status=status.HTTP_201_CREATED)
     def list(self, request):
