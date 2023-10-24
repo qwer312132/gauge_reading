@@ -10,6 +10,7 @@ from rest_framework import status
 import cv2
 import os
 from read.read import read
+from SAM.detect_mask import getmasks_bypoint
 import numpy as np
 import base64
 from io import BytesIO
