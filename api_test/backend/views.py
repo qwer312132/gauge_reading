@@ -48,8 +48,10 @@ def mark(request):
             maskrcnn.image.save(f'needleimage_{i}_{j}.jpg', InMemoryUploadedFile(image_bytesio, None, f'needleimage_{i}_{j}.jpg', 'image/jpeg', len(buffer), None))
     return Response({'message': 0,"image":returnimage}, status=status.HTTP_201_CREATED)
 def choose_best(request):
-    best = request.data.get('best')
-    best = json.loads(best)
+    best = request.data.get('correctImageIndexs')
+    print(best)
+    best = best.split(',')
+    best = list(map(int, best))
     maskrcnndata = Maskrcnndata.objects.all().order_by('id')
     for i in range(len(maskrcnndata)):
         if(i in best):
