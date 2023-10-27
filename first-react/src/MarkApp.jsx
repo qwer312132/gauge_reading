@@ -364,6 +364,11 @@ class MarkApp extends Component {
     return (
       <div>
         <h1>標註系統</h1>
+        {/* <Router>
+          <Link to="/camera">相機拍照</Link>
+          <Route path="/camera" component={CameraApp} />
+        </Router> */}
+        
         <button onClick={this.label} className="button">
           標註系統
         </button>
