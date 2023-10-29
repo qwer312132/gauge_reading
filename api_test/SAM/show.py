@@ -24,6 +24,6 @@ def show_box(box, ax):
 def show_mask_on_image(image, mask, random_color=False):
 
     # 遮罩为True的地方使用原始图像的值，False的地方使用遮罩透明度较低的值
-    masked_image = np.where(mask[:, :, np.newaxis], image * 0.2, image)
+    masked_image = np.where(mask[:, :, np.newaxis], image, image * 0.2)
 
     return masked_image.astype(np.uint8)
