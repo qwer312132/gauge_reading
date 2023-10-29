@@ -7,9 +7,9 @@ class MarkApp extends Component {
     super(props);
     this.state = {
       text: null,
-      images: [],
+      images: [], //原圖 File格式
       isModalOpen: false,
-      compressedImages: [], // 存壓縮後的圖片
+      showImages: [], // url儲存的圖片 用來顯示在前端
       currentImageIndex: 0, // 當前圖片索引
       pointerCoordinates: [], // 存每個圖片的指針座標
       scaleStartCoordinate: null, // 存圖片的起始座標
@@ -39,13 +39,15 @@ class MarkApp extends Component {
   handleFileChange = (event) => {
     const files = event.target.files;
 
+    // console.log("傳的images:", files[0]);
+
     // for (let i = 0; i < files.length; i++) {
     //   const targetSize = 400;
     //   const aspectRatio = files[i].width / files[i].height;
     //   files[i].width = targetSize;
     //   files[i].height = targetSize / aspectRatio;
     // }
-    // console.log("compressed images:", files);感覺是錯的
+    // console.log("直接壓縮 傳的images:", files[0].width); //感覺是錯的
 
     this.setState({ images: files });
     // 遍歷每個文件並進行處理
@@ -53,7 +55,7 @@ class MarkApp extends Component {
       const file = files[i];
 
       const reader = new FileReader();
-      const { compressedImages } = this.state;
+      const { showImages } = this.state;
 
       //直接上傳原圖
 
@@ -65,25 +67,26 @@ class MarkApp extends Component {
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
 
-          // 將畫布大小設置為 200x200 像素
-          // const targetSize = 400;
-          // const aspectRatio = img.width / img.height;
-          // canvas.width = targetSize;
-          // canvas.height = targetSize / aspectRatio;
+          // 將畫布等比例縮放 寬為400
+          const targetSize = 400;
+          const aspectRatio = img.width / img.height;
+          canvas.width = targetSize;
+          canvas.height = targetSize / aspectRatio;
 
-          canvas.width = img.width;
-          canvas.height = img.height;
+          //原尺寸!
+          // canvas.width = img.width;
+          // canvas.height = img.height;
           // 在畫布上繪製壓縮後的圖像
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
           // 將壓縮後的圖像數據添加到數組中
-          // compressedImages.push(canvas.toDataURL("image/jpeg"));
+          // showImages.push(canvas.toDataURL("image/jpeg"));
           //改成png;base64
-          compressedImages.push(canvas.toDataURL("image/png"));
+          showImages.push(canvas.toDataURL("image/png"));
           // 如果處理完所有文件，將圖像數組存儲在狀態中並打開模態框
-          if (compressedImages.length === files.length) {
-            this.setState({ compressedImages, isModalOpen: true });
-            // console.log(compressedImages);
+          if (showImages.length === files.length) {
+            this.setState({ showImages, isModalOpen: true });
+            // console.log("showImages:", showImages);
           }
         };
       };
@@ -92,8 +95,8 @@ class MarkApp extends Component {
   };
 
   handleNextImage = () => {
-    const { currentImageIndex, compressedImages } = this.state;
-    if (currentImageIndex < compressedImages.length - 1) {
+    const { currentImageIndex, showImages } = this.state;
+    if (currentImageIndex < showImages.length - 1) {
       this.setState({ currentImageIndex: currentImageIndex + 1 });
     }
   };
@@ -108,7 +111,7 @@ class MarkApp extends Component {
 
   closeModal = () => {
     this.setState({
-      compressedImages: [],
+      showImages: [],
       currentImageIndex: 0,
       pointerCoordinates: [], // 存每個圖片的指針座標
       scaleStartCoordinate: null, // 存圖片的起始座標
@@ -125,7 +128,7 @@ class MarkApp extends Component {
 
   submitModal = () => {
     const {
-      compressedImages,
+      showImages,
       images,
       pointerCoordinates,
       scaleStartCoordinate,
@@ -138,10 +141,10 @@ class MarkApp extends Component {
     //上傳的資料型態
     const formData = new FormData();
     formData.append("operation", "user_mark2");
-    formData.append("imageLength", compressedImages.length);
+    formData.append("imageLength", showImages.length);
 
     // formData.append("image", images[0]);
-    for (let i = 0; i < compressedImages?.length; i++) {
+    for (let i = 0; i < showImages?.length; i++) {
       formData.append(`image${i}`, images[i]);
       console.log(`image${i}:`, images[i]);
     }
@@ -346,7 +349,7 @@ class MarkApp extends Component {
       // text,
       // images,
       isModalOpen,
-      compressedImages,
+      showImages,
       currentImageIndex,
       pointerCoordinates,
       // fileInputRef,
@@ -360,15 +363,11 @@ class MarkApp extends Component {
       correctImageIndexs,
     } = this.state;
     const isFirstImage = currentImageIndex === 0;
-    const isLastImage = currentImageIndex === compressedImages.length - 1;
+    const isLastImage = currentImageIndex === showImages.length - 1;
     return (
       <div>
         <h1>標註系統</h1>
-        {/* <Router>
-          <Link to="/camera">相機拍照</Link>
-          <Route path="/camera" component={CameraApp} />
-        </Router> */}
-        
+
         <button onClick={this.label} className="button">
           標註系統
         </button>
@@ -415,9 +414,9 @@ class MarkApp extends Component {
           ariaHideApp={false}
         >
           <div className="image-container">
-            {compressedImages[currentImageIndex] && (
+            {showImages[currentImageIndex] && (
               <img
-                src={compressedImages[currentImageIndex]}
+                src={showImages[currentImageIndex]}
                 alt={`壓縮後 ${currentImageIndex}`}
                 onClick={this.handleImageClick}
               />
