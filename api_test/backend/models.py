@@ -19,11 +19,11 @@ class Maskrcnndata(models.Model):
     endx = models.FloatField(null=True)
     endy = models.FloatField(null=True)
     endvalue = models.IntegerField(null=True)
-    image = models.ImageField(null=True, upload_to='trainImage/')
-    needlemask = models.ImageField(null=True, upload_to='trainMask/')
-    needleKD = models.FileField(null=True, upload_to='trainMask/')
-    discmask = models.ImageField(null=True, upload_to='trainMask/')
-    discKD = models.FileField(null=True, upload_to='trainMask/')
+    image = models.ImageField(null=True, upload_to='maskrcnnFile/trainImage/')
+    needlemask = models.ImageField(null=True, upload_to='maskrcnnFile/trainMask/')
+    needleKD = models.FileField(null=True, upload_to='maskrcnnFile/trainMask/')
+    discmask = models.ImageField(null=True, upload_to='maskrcnnFile/trainMask/')
+    discKD = models.FileField(null=True, upload_to='maskrcnnFile/trainMask/')
 
 class MaskrcnndataAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Maskrcnndata._meta.fields]

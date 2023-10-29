@@ -17,60 +17,80 @@ class PennFudanDataset(object):
         self.transforms = transforms
         # load all image files, sorting them to
         # ensure that they are aligned
-        self.imgs = list(sorted(os.listdir(os.path.join(root, "needleimage"))))
-        self.masks = list(sorted(os.listdir(os.path.join(root, "needlemask"))))
+        self.imgs = list(sorted(os.listdir(os.path.join(root, "trainImage"))))
+        self.masks = list(sorted(os.listdir(os.path.join(root, "trainMask"))))
         self.classnum = classnum
 
     def __getitem__(self, idx):
         # load images and masks
         # print(idx)
         # print(len(self.imgs),len(self.masks))
-        img_path = os.path.join(self.root, "needleimage", self.imgs[idx])
+        img_path = os.path.join(self.root, "trainImage", self.imgs[idx])
         img = Image.open(img_path).convert("RGB")
         boxes = []
         masks = []
+        teacher_masks = []
         num_objs=0
-        cls = self.classnum-1
-        mask_path = img_path.replace("needleimage","needlemask")
-        mask_path = mask_path.replace(".jpg","_2.png")
+        cls = (self.classnum-1)*2
+        mask_path = img_path.replace("trainImage","trainMask")
         for i in range(cls):
-            # mask_path = os.path.join(self.root, "needlemask", self.masks[idx*cls+i])
+            # mask_path = os.path.join(self.root, "trainMask", self.masks[idx*cls+i])
             # print("mask path")
             # print(mask_path)
             # note that we haven't converted the mask to RGB,
             # because each color corresponds to a different instance
             # with 0 being background
-            mask = Image.open(mask_path)
+            if i == 0:
+                mask_path = mask_path.replace(".jpg","_0.jpg")
+            elif i == 1:
+                mask_path = mask_path.replace("_0.jpg","_1.npy")
+                teacher_masks.append(np.load(mask_path))
+                # teacher_masks = torch.as_tensor(teacher_masks, dtype=torch.uint8)
+                continue
+            elif i == 2:
+                mask_path = mask_path.replace("_1.npy","_2.jpg")
+            elif i == 3:
+                mask_path = mask_path.replace("_2.jpg","_3.npy")
+                teacher_masks.append(np.load(mask_path))
+                # teacher_masks = torch.as_tensor(teacher_masks, dtype=torch.uint8)
+                continue
+            original_mask = Image.open(mask_path).convert("1")
+            np.reshape(original_mask,(img.size[0],img.size[1]))
+            # original_mask.show()
+            # print(np.unique(original_mask))
             # convert the PIL Image into a numpy array
-            mask = np.array(mask)
-
-            # instances are encoded as different colors
+            mask = np.array(original_mask)
+            # instances are encoded as different colors         
             obj_ids = np.unique(mask)
+            # print(np.unique(mask))
             # first id is the background, so remove it
             obj_ids = obj_ids[1:]
             # split the color-encoded mask into a set
             # of binary masks
-            mask = mask == obj_ids[:, None, None]
-            masks.append(mask[0])
+            truefalse_mask = mask == obj_ids[:, None, None]
+            masks.append(truefalse_mask[0])
             # get bounding box coordinates for each mask
             num_objs += len(obj_ids)
-            # print(num_objs)
             for i in range(len(obj_ids)):
-                pos = np.where(mask[i])
+                pos = np.where(truefalse_mask[i])
+                # print(pos)
+
                 xmin = np.min(pos[1])
+
+                    
                 xmax = np.max(pos[1])
                 ymin = np.min(pos[0])
                 ymax = np.max(pos[0])
                 boxes.append([xmin, ymin, xmax, ymax])
-                # print(xmin,ymin,xmax,ymax)
-            mask_path = mask_path.replace("_2.png",".png")
         # convert everything into a torch.Tensor
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         # there is only one class
-        a = np.array([2,1])
+        a = np.array([1,2])
         labels = torch.as_tensor(a, dtype=torch.int64)
+        masks = np.array(masks)
         masks = torch.as_tensor(masks, dtype=torch.uint8)
-
+        teacher_masks = np.array(teacher_masks)
+        teacher_masks = torch.as_tensor(teacher_masks, dtype=torch.float32)
         image_id = torch.tensor([idx])
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
         # suppose all instances are not crowd
@@ -80,6 +100,7 @@ class PennFudanDataset(object):
         target["boxes"] = boxes
         target["labels"] = labels
         target["masks"] = masks
+        target["teacher_masks"] = teacher_masks
         target["image_id"] = image_id
         target["area"] = area
         target["iscrowd"] = iscrowd
@@ -131,8 +152,8 @@ def main():
     # our dataset has two classes only - background and person
     num_classes = 3
     # use our dataset and defined transformations
-    dataset = PennFudanDataset('PennFudanPed', get_transform(train=True), num_classes)
-    dataset_test = PennFudanDataset('PennFudanPed', get_transform(train=False), num_classes)
+    dataset = PennFudanDataset('maskrcnnFile', get_transform(train=True), num_classes)
+    dataset_test = PennFudanDataset('maskrcnnFile', get_transform(train=False), num_classes)
     
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
