@@ -34,6 +34,12 @@ def mark(request):
         image_data = image.read()
         image_array = np.frombuffer(image_data, np.uint8)
         imagenumpy = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        height, width, channels = imagenumpy.shape
+        new_width = 400
+        new_height = int(height * new_width / width)
+        imagenumpy = cv2.resize(imagenumpy, (new_width, new_height))
+        imagebuffer = cv2.imencode('.jpg', imagenumpy)[1].tobytes()
+        origin_image_bytesio = BytesIO(imagebuffer)
         needleX = pointerCoordinates[i][0]['x']
         needleY = pointerCoordinates[i][0]['y']
         discFrameStartX = discFrameStartCoordinates[i][0]['x']
@@ -58,7 +64,8 @@ def mark(request):
             maskrcnn.endx = scaleEndCoordinate['x']
             maskrcnn.endy = scaleEndCoordinate['y']
             maskrcnn.endvalue = scaleEndValue
-            maskrcnn.image.save(f'image_{i}_{j}.jpg', image)
+            # maskrcnn.image.save(f'image_{i}_{j}.jpg', image)
+            maskrcnn.image.save(f'image_{i}_{j}.jpg', InMemoryUploadedFile(origin_image_bytesio, None, f'image_{i}_{j}.jpg', 'image/jpeg', len(imagebuffer), None))
             buffer = BytesIO()
             np.save(buffer, needlemaskKD[j])
             buffer.seek(0)
@@ -153,7 +160,9 @@ def dataAugmentationMask(directory):
 def dataAugmentationImage(directory):
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
+        print(f)
         image = cv2.imread(f)
+        print(image.shape)
         for i in range(1,4):
             rotate_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
             cv2.imwrite(f.replace(".jpg","-"+str(i)+".jpg"), rotate_image)
@@ -173,14 +182,22 @@ class MyViewSet(viewsets.ModelViewSet):
             dataAugmentationImage("maskrcnnFile/trainImage/")
             train.main()
             return ret
+            # return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
         else:
             image = request.data.get('image')
             # 调用read函数并设置gauge_data字段的值
             image_data = image.read()
             image_array = np.frombuffer(image_data, np.uint8)
             imagenumpy = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-            result = read(imagenumpy)
-            return Response({'data':result},status=status.HTTP_200_OK, content_type = 'application/json')
+            latest_data = Maskrcnndata.objects.latest('id')
+            startx = latest_data.startx
+            starty = latest_data.starty
+            startvalue = latest_data.startvalue
+            endx = latest_data.endx
+            endy = latest_data.endy
+            endvalue = latest_data.endvalue
+            result = read(imagenumpy,startx, starty, startvalue, endx, endy, endvalue)
+            return Response({'message':result},status=status.HTTP_200_OK, content_type = 'application/json')
         
         #計算指針刻度
         # result = read(imagenumpy)

@@ -76,7 +76,7 @@ def mouse_callback(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         print("Clicked coordinates: ({}, {})".format(x, y))
 
-def read(image):
+def read(image,startx, starty, startvalue, endx, endy, endvalue):
     # import os
     # cwd = os.getcwd()
     # print(cwd)
@@ -135,12 +135,12 @@ def read(image):
 
     # print("Points:", max_points)
 
-    start_ponit = np.array([68,221])
-    end_point = np.array([68,220])
+    start_ponit = np.array([startx,starty])
+    end_point = np.array([endx,endy])
 
 
     # 调用函数计算水表读数
-    reading = calculate_water_meter_reading(center_point, 0, 12, pointer_head, start_ponit, end_point)
+    reading = calculate_water_meter_reading(center_point, startvalue, endvalue, pointer_head, start_ponit, end_point)
 
     print("Water meter reading:", reading)
 
