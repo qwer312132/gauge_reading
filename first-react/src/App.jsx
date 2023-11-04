@@ -20,7 +20,7 @@ function App() {
                   to="/mark"
                   style={{ textDecoration: "none", color: "black" }}
                 >
-                  標記系統
+                  標記訓練系統
                 </Link>
               </button>
             </li>
@@ -30,7 +30,7 @@ function App() {
                   to="/camera"
                   style={{ textDecoration: "none", color: "black" }}
                 >
-                  拍照系統
+                  偵測辨別系統
                 </Link>
               </button>
             </li>

@@ -8,6 +8,7 @@ class CameraApp extends Component {
       intervalId: null,
       gaugeData: "尚未取得資料",
       photoNum: 0,
+      processedImage: null,
     };
     this.videoRef = React.createRef();
   }
@@ -45,7 +46,7 @@ class CameraApp extends Component {
   }
 
   startPhotoInterval() {
-    const intervalId = setInterval(this.takePhoto, 10000); // 10 seconds
+    const intervalId = setInterval(this.takePhoto, 10000); // 10 seconds !!可以改
     this.setState({ intervalId });
   }
 
@@ -55,7 +56,7 @@ class CameraApp extends Component {
   }
 
   takePhoto = () => {
-    const { cameraStream, photoNum, gaugeData }= this.state;
+    const { cameraStream, photoNum } = this.state;
     if (cameraStream) {
       const video = this.videoRef.current;
       const canvas = document.createElement("canvas");
@@ -86,11 +87,14 @@ class CameraApp extends Component {
               console.log("upload photo success");
               this.setState({ photoNum: photoNum + 1 });
               response.json().then((data) => {
-                console.log(data)
-                // data = JSON.stringify(data) 
-                console.log(data)
-
-                this.setState({ gaugeData: data.message });
+                console.log(data);
+                // data = JSON.stringify(data)
+                console.log(data);
+                //在這裡接收資料
+                this.setState({
+                  gaugeData: data.message,
+                  processedImage: data.image,
+                });
               });
             } else {
               console.error("upload photo failed");
@@ -102,30 +106,23 @@ class CameraApp extends Component {
       }, "image/jpeg");
     }
   };
-
-  getData = () => {
-    fetch("http://127.0.0.1:8000/api/MyData/")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        this.setState({ gaugeData: data.data });
-      })
-      .catch((error) => {
-        console.error("Error getting backend data:", error);
-      });
-  };
-
   render() {
-    const { gaugeData, isModalOpen, compressedImages, currentImageIndex } =
-      this.state;
+    const {
+      gaugeData,
+      // isModalOpen,
+      // compressedImages,
+      // currentImageIndex,
+      processedImage,
+    } = this.state;
     return (
       <div>
-        <h1>相機拍照</h1>
+        <h1>偵測辨別系統</h1>
+        <p>說明：每10秒透過視訊鏡頭拍一張照片，並進行指針偵測及刻度辨識。</p>
         <div>
-          <button onClick={this.getData}>獲取數據</button>
-          <a>{gaugeData}</a>
+          <p>目前的資料為：{gaugeData}</p>
         </div>
-        <video ref={this.videoRef} autoPlay />
+        <video ref={this.videoRef} autoPlay alt="沒有鏡頭" />
+        <img src={processedImage} alt="沒有處理過的照片" />
       </div>
     );
   }

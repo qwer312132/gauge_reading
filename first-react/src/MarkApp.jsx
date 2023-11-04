@@ -367,7 +367,10 @@ class MarkApp extends Component {
     return (
       <div>
         <h1>標註系統</h1>
-
+        <p>
+          說明：
+          選擇多張圖片開始進行標註，每張圖片都需要標註指針座標、起始刻度座標、結束刻度座標、圓盤座標。送出後，選擇正確的候選圖片。
+        </p>
         <button onClick={this.label} className="button">
           標註系統
         </button>
@@ -521,7 +524,7 @@ class MarkApp extends Component {
                     onClick={() => this.setState({ markClass: 1 })}
                     className="button red-button "
                   >
-                    標註起始刻度座標
+                    一點標註起始刻度座標
                   </button>
                   {scaleStartCoordinate && (
                     <div>
@@ -556,7 +559,7 @@ class MarkApp extends Component {
                     onClick={() => this.setState({ markClass: 2 })}
                     className="button yellow-button"
                   >
-                    標註結束刻度座標
+                    一點標註結束刻度座標
                   </button>
                   {scaleEndCoordinate && (
                     <div>
@@ -594,7 +597,7 @@ class MarkApp extends Component {
                 onClick={() => this.setState({ markClass: 3 })}
                 className="button pink-button "
               >
-                標註指針座標
+                一點標註指針座標
               </button>
               {pointerCoordinates[currentImageIndex] &&
                 pointerCoordinates[currentImageIndex].map(
