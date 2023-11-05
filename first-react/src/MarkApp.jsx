@@ -366,10 +366,12 @@ class MarkApp extends Component {
     const isLastImage = currentImageIndex === showImages.length - 1;
     return (
       <div>
-        <h1>標註系統</h1>
+        <h1>標示訓練系統</h1>
         <p>
           說明：
-          選擇多張圖片開始進行標註，每張圖片都需要標註指針座標、起始刻度座標、結束刻度座標、圓盤座標。送出後，選擇正確的候選圖片。
+          選擇多張圖片開始進行標註，第一張圖片需要標示指針座標、圓盤座標、起始和結束刻度座標，
+          <br />
+          並填入起始和結束刻度大小，其餘只要標示指針座標和圓盤座標。送出後，選擇正確的候選圖片。
         </p>
         <button onClick={this.label} className="button">
           標註系統
