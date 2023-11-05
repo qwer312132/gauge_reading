@@ -20,7 +20,7 @@ function App() {
                   to="/mark"
                   style={{ textDecoration: "none", color: "black" }}
                 >
-                  標記訓練系統
+                  標示訓練系統
                 </Link>
               </button>
             </li>
