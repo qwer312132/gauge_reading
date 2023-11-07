@@ -29,7 +29,7 @@ def showbbox(model, img):
         'scores': tensor([1.0000, 1.0000], device='cuda:0')}]
         '''
         prediction = model([img.to(device)])
-    print(prediction)
+    # print(prediction)
     # end = time.time()
     # print("only predict")
     # print(end-start)
@@ -41,11 +41,11 @@ def showbbox(model, img):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     mask = np.array(prediction[0]['masks'].detach().cpu() * 255)
     mask = mask.astype("uint8")
-    
+    vis=[0,0]
     for i in range(prediction[0]['boxes'].cpu().shape[0]):
         
-        if prediction[0]['scores'][i].item()<0.6:
-            continue
+        # if prediction[0]['scores'][i].item()<0.6:
+        #     continue
         xmin = round(prediction[0]['boxes'][i][0].item())
         ymin = round(prediction[0]['boxes'][i][1].item())
         xmax = round(prediction[0]['boxes'][i][2].item())
@@ -56,27 +56,34 @@ def showbbox(model, img):
         contours, hierarchy = cv2.findContours(mm, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         # Draw contours:
         if label == 1:
-            print(label)
+            if vis[0] == 1:
+                continue
+            vis[0] = 1
             # cv2.drawContours(img, contours, -1, (0, 255, 0), 5)
             # cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (255, 0, 0), 5)
             # cv2.putText(img, '1', (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0))
             needle = mm
         elif label == 2:
+            if vis[1] == 1:
+                continue
+            vis[1] = 1
             # cv2.drawContours(img, contours, -1, (0, 0, 255), 3)
             # cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 5)
             # cv2.putText(img, '2', (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0))
-            pos = np.where(mask[i])
-            xmean = int(np.mean(pos[2]))
-            ymean = int(np.mean(pos[1]))
+            # pos = np.where(mask[i])
+            # xmean = int(np.mean(pos[2]))
+            # ymean = int(np.mean(pos[1]))
+            disc = mm
             # cv2.circle(img,(xmean,ymean),10,(0,122,20),10)
-
+        if vis[0] == 1 and vis[1] == 1:
+            break
     # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     # cv2.imshow('Image', img)
 
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
     # return img
-    return (needle,(xmean,ymean))
+    return (needle,disc)
 
 if __name__ == "__main__":
     num_class = 2

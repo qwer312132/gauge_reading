@@ -26,7 +26,7 @@ def eval_show(img):
     import time
     start = time.time()
     model = get_model_instance_segmentation(num_class)
-    model.load_state_dict(torch.load("read/maskrcnn/test.pth"),False)
+    model.load_state_dict(torch.load("test.pth"),False)
     model.eval()
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     end = time.time()
