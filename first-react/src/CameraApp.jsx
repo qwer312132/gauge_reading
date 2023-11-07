@@ -83,22 +83,15 @@ class CameraApp extends Component {
           body: formData,
         })
           .then((response) => {
-            if (response.ok) {
-              console.log("upload photo success");
-              this.setState({ photoNum: photoNum + 1 });
-              response.json().then((data) => {
-                console.log(data);
-                // data = JSON.stringify(data)
-                console.log(data);
-                //在這裡接收資料
-                this.setState({
-                  gaugeData: data.message,
-                  processedImage: data.image,
-                });
-              });
-            } else {
-              console.error("upload photo failed");
-            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("收到處理過的照片");
+            this.setState({ photoNum: photoNum + 1 });
+            this.setState({
+              gaugeData: data.message,
+              processedImage: data.image,
+            });
           })
           .catch((error) => {
             console.error("Error uploading photo:", error);
