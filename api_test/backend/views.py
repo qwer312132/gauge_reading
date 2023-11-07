@@ -10,7 +10,7 @@ from rest_framework import status
 import cv2
 import os
 from read.read import read
-from SAM.detect_mask import getmasks_bypoint, getmasks_bybox, getmasks_bypoint_float, getmasks_bybox_float
+# from SAM.detect_mask import getmasks_bypoint, getmasks_bybox, getmasks_bypoint_float, getmasks_bybox_float
 import numpy as np
 import base64
 from io import BytesIO
@@ -174,7 +174,8 @@ class MyViewSet(viewsets.ModelViewSet):
         # 获取POST请求的数据
         print(request.data)
         if(request.data.get('operation') == 'user_mark2'):
-            return mark(request)
+            # return mark(request)
+            return
         elif (request.data.get('operation') == 'choose_best'):
             ret = choose_best(request)
             modifyfilename()
@@ -196,8 +197,20 @@ class MyViewSet(viewsets.ModelViewSet):
             endx = latest_data.endx
             endy = latest_data.endy
             endvalue = latest_data.endvalue
-            result = read(imagenumpy,startx, starty, startvalue, endx, endy, endvalue)
-            return Response({'message':result},status=status.HTTP_200_OK, content_type = 'application/json')
+            height, width, channels = imagenumpy.shape
+            new_width = 400
+            new_height = int(height * new_width / width)
+            imagenumpy = cv2.resize(imagenumpy, (new_width, new_height))
+            imagebuffer = cv2.imencode('.jpg', imagenumpy)[1].tobytes()
+            image_bytesio = BytesIO(imagebuffer)
+            mydata = MyData()
+            result,return_image = read(imagenumpy,startx, starty, startvalue, endx, endy, endvalue)
+            mydata.data = "test"
+            mydata.gauge_data=result
+            mydata.image.save('image.jpg', InMemoryUploadedFile(image_bytesio, None, 'image.jpg', 'image/jpeg', len(imagebuffer), None))
+            encode_image = cv2.imencode('.jpg', return_image)[1]
+            returnimage = base64.b64encode(encode_image.tostring()).decode('utf-8')
+            return Response({'message':result,'image':returnimage},status=status.HTTP_200_OK, content_type = 'application/json')
         
         #計算指針刻度
         # result = read(imagenumpy)
