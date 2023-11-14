@@ -68,7 +68,7 @@ class MarkApp extends Component {
           const ctx = canvas.getContext("2d");
 
           // 將畫布等比例縮放 寬為400
-          const targetSize = 400;
+          const targetSize = 200;
           const aspectRatio = img.width / img.height;
           canvas.width = targetSize;
           canvas.height = targetSize / aspectRatio;
@@ -308,13 +308,29 @@ class MarkApp extends Component {
   handleCorrectImageIndexs = (e) => {
     const { correctImageIndexs } = this.state;
     const index = e.target.innerHTML - 1;
+    //每三個只能選一個
     //如果correctImageIndexs裡面的值沒有index，就放進去
     if (!correctImageIndexs.includes(index)) {
+      var indexToDelete = parseInt(index / 3);
+      var d1 = indexToDelete * 3;
+      var d2 = indexToDelete * 3 + 1;
+      var d3 = indexToDelete * 3 + 2;
+      for (let i = 0; i < correctImageIndexs.length; i++) {
+        if (
+          correctImageIndexs[i] == 3 * indexToDelete ||
+          correctImageIndexs[i] == 3 * indexToDelete + 1 ||
+          correctImageIndexs[i] == 3 * indexToDelete + 2
+        ) {
+          correctImageIndexs.splice(i, 1);
+        }
+      }
       correctImageIndexs.push(index);
+      // e.target.style.backgroundColor = "red";
     } else {
       //如果有，就刪掉
       const indexToDelete = correctImageIndexs.indexOf(index);
       correctImageIndexs.splice(indexToDelete, 1);
+      // e.target.style.backgroundColor = "#f0f0f0";
     }
     //分類
     correctImageIndexs.sort((a, b) => a - b);
@@ -398,123 +414,145 @@ class MarkApp extends Component {
             </div>
           )
         }
-
-        {getImage &&
-          getImage.map((image, index) => (
-            <div key={index}>
-              <button
-                onClick={this.handleCorrectImageIndexs}
-                className="button"
-              >
-                {index + 1}
-              </button>
-              <img src={`data:image/jpeg;base64,${image}`} alt="getImage們" />
-            </div>
-          ))}
+        <div className="wrap-3">
+          {getImage &&
+            getImage.map((image, index) => (
+              //每三個一排
+              <div key={index} className="wrap-3">
+                <button
+                  onClick={this.handleCorrectImageIndexs}
+                  className={`button ${
+                    correctImageIndexs.includes(index)
+                      ? "white-blue-background"
+                      : ""
+                  }`}
+                >
+                  {index + 1}
+                </button>
+                <img src={`data:image/jpeg;base64,${image}`} alt="getImage們" />
+              </div>
+            ))}
+        </div>
         <Modal
           isOpen={isModalOpen}
           onRequestClose={this.closeModal}
           ariaHideApp={false}
+          className="no-wrap"
         >
-          <div className="image-container">
-            {showImages[currentImageIndex] && (
-              <img
-                src={showImages[currentImageIndex]}
-                alt={`壓縮後 ${currentImageIndex}`}
-                onClick={this.handleImageClick}
-              />
-            )}
-            {currentImageIndex === 0 && scaleStartCoordinate && (
-              <div
-                className="dot red-dot"
-                style={{
-                  left: scaleStartCoordinate.x,
-                  top: scaleStartCoordinate.y,
-                }}
-              ></div>
-            )}
-            {currentImageIndex === 0 && scaleEndCoordinate && (
-              <div
-                className="dot yellow-dot"
-                style={{
-                  left: scaleEndCoordinate.x,
-                  top: scaleEndCoordinate.y,
-                }}
-              ></div>
-            )}
-            {discFrameStartCoordinates[currentImageIndex] &&
-              !discFrameEndCoordinates[currentImageIndex] &&
-              discFrameStartCoordinates[currentImageIndex].map(
-                (coordinate, index) => (
-                  <div
-                    key={index}
-                    className="dot blue-dot"
-                    style={{
-                      left: coordinate.x,
-                      top: coordinate.y,
-                    }}
-                  ></div>
-                )
+          <div>
+            <div className="image-container ">
+              {showImages[currentImageIndex] && (
+                <img
+                  src={showImages[currentImageIndex]}
+                  alt={`壓縮後 ${currentImageIndex}`}
+                  onClick={this.handleImageClick}
+                />
               )}
-            {discFrameStartCoordinates[currentImageIndex] &&
-              discFrameEndCoordinates[currentImageIndex] &&
-              //用兩座標畫出框
-              discFrameStartCoordinates[currentImageIndex].map(
-                (startCoordinate, startIndex) => (
-                  <div>
-                    {discFrameEndCoordinates[currentImageIndex] &&
-                      discFrameEndCoordinates[currentImageIndex].map(
-                        (endCoordinate, endIndex) => (
-                          <div
-                            className="draw-rect"
-                            style={{
-                              position: "absolute",
-                              left: Math.min(
-                                startCoordinate.x,
-                                endCoordinate.x
-                              ),
-                              top: Math.min(startCoordinate.y, endCoordinate.y),
-                              width: Math.abs(
-                                endCoordinate.x - startCoordinate.x
-                              ),
-                              height: Math.abs(
-                                endCoordinate.y - startCoordinate.y
-                              ),
-                              border: "2px solid blue",
-                            }}
-                          ></div>
-                        )
-                      )}
-                  </div>
-                )
-              )}
-            {pointerCoordinates[currentImageIndex] &&
-              pointerCoordinates[currentImageIndex].map((coordinate, index) => (
+              {currentImageIndex === 0 && scaleStartCoordinate && (
                 <div
-                  key={index}
-                  className="dot pink-dot"
+                  className="dot red-dot"
                   style={{
-                    left: coordinate.x,
-                    top: coordinate.y,
+                    left: scaleStartCoordinate.x,
+                    top: scaleStartCoordinate.y,
                   }}
                 ></div>
-              ))}
-          </div>
-          <div>
-            <button
-              onClick={this.handlePreviousImage}
-              className="button"
-              disabled={isFirstImage}
-            >
-              前一張
-            </button>
-            <button
-              onClick={this.handleNextImage}
-              className="button"
-              disabled={isLastImage}
-            >
-              下一張
-            </button>
+              )}
+              {currentImageIndex === 0 && scaleEndCoordinate && (
+                <div
+                  className="dot yellow-dot"
+                  style={{
+                    left: scaleEndCoordinate.x,
+                    top: scaleEndCoordinate.y,
+                  }}
+                ></div>
+              )}
+              {discFrameStartCoordinates[currentImageIndex] &&
+                !discFrameEndCoordinates[currentImageIndex] &&
+                discFrameStartCoordinates[currentImageIndex].map(
+                  (coordinate, index) => (
+                    <div
+                      key={index}
+                      className="dot blue-dot"
+                      style={{
+                        left: coordinate.x,
+                        top: coordinate.y,
+                      }}
+                    ></div>
+                  )
+                )}
+              {discFrameStartCoordinates[currentImageIndex] &&
+                discFrameEndCoordinates[currentImageIndex] &&
+                //用兩座標畫出框
+                discFrameStartCoordinates[currentImageIndex].map(
+                  (startCoordinate, startIndex) => (
+                    <div>
+                      {discFrameEndCoordinates[currentImageIndex] &&
+                        discFrameEndCoordinates[currentImageIndex].map(
+                          (endCoordinate, endIndex) => (
+                            <div
+                              className="draw-rect"
+                              style={{
+                                position: "absolute",
+                                left: Math.min(
+                                  startCoordinate.x,
+                                  endCoordinate.x
+                                ),
+                                top: Math.min(
+                                  startCoordinate.y,
+                                  endCoordinate.y
+                                ),
+                                width: Math.abs(
+                                  endCoordinate.x - startCoordinate.x
+                                ),
+                                height: Math.abs(
+                                  endCoordinate.y - startCoordinate.y
+                                ),
+                                border: "2px solid blue",
+                              }}
+                            ></div>
+                          )
+                        )}
+                    </div>
+                  )
+                )}
+              {pointerCoordinates[currentImageIndex] &&
+                pointerCoordinates[currentImageIndex].map(
+                  (coordinate, index) => (
+                    <div
+                      key={index}
+                      className="dot pink-dot"
+                      style={{
+                        left: coordinate.x,
+                        top: coordinate.y,
+                      }}
+                    ></div>
+                  )
+                )}
+            </div>
+            <div>
+              <button
+                onClick={this.handlePreviousImage}
+                className="button"
+                disabled={isFirstImage}
+              >
+                上一張
+              </button>
+              <button
+                onClick={this.handleNextImage}
+                className="button"
+                disabled={isLastImage}
+              >
+                下一張
+              </button>
+            </div>
+            <div>
+              <button onClick={this.closeModal} className="button">
+                關閉
+              </button>
+              <button onClick={this.submitModal} className="button">
+                送出
+              </button>
+            </div>
           </div>
           <div>
             {currentImageIndex === 0 && (
@@ -663,12 +701,6 @@ class MarkApp extends Component {
                 )}
             </div>
           </div>
-          <button onClick={this.closeModal} className="button">
-            關閉
-          </button>
-          <button onClick={this.submitModal} className="button">
-            送出
-          </button>
         </Modal>
       </div>
     );
