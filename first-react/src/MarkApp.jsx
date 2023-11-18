@@ -312,14 +312,11 @@ class MarkApp extends Component {
     //如果correctImageIndexs裡面的值沒有index，就放進去
     if (!correctImageIndexs.includes(index)) {
       var indexToDelete = parseInt(index / 3);
-      var d1 = indexToDelete * 3;
-      var d2 = indexToDelete * 3 + 1;
-      var d3 = indexToDelete * 3 + 2;
       for (let i = 0; i < correctImageIndexs.length; i++) {
         if (
-          correctImageIndexs[i] == 3 * indexToDelete ||
-          correctImageIndexs[i] == 3 * indexToDelete + 1 ||
-          correctImageIndexs[i] == 3 * indexToDelete + 2
+          correctImageIndexs[i] === 3 * indexToDelete ||
+          correctImageIndexs[i] === 3 * indexToDelete + 1 ||
+          correctImageIndexs[i] === 3 * indexToDelete + 2
         ) {
           correctImageIndexs.splice(i, 1);
         }
