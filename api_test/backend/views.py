@@ -35,7 +35,7 @@ def mark(request):
         image_array = np.frombuffer(image_data, np.uint8)
         imagenumpy = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
         height, width, channels = imagenumpy.shape
-        new_width = 400
+        new_width = 200
         new_height = int(height * new_width / width)
         imagenumpy = cv2.resize(imagenumpy, (new_width, new_height))
         imagebuffer = cv2.imencode('.jpg', imagenumpy)[1].tobytes()

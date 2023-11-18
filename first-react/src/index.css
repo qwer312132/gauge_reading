@@ -7,13 +7,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+ 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
-.no-wrap-div {
-  white-space: nowrap;
+.no-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.wrap-3 {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.wrap-3 > div {
+  width: 33.33%; /* Set the width to one-third to create three columns */
+  box-sizing: border-box;
+  padding: 5px; /* Add padding for spacing between images */
 }
 
 .coordinates-display {
@@ -69,4 +82,8 @@ code {
 .blue-button {
   background-color: blue;
   color: white;
+}
+
+.white-blue-background {
+  background-color: #84C1FF;
 }
