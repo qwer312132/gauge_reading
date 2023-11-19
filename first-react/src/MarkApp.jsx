@@ -12,14 +12,15 @@ class MarkApp extends Component {
       showImages: [], // url儲存的圖片 用來顯示在前端
       currentImageIndex: 0, // 當前圖片索引
       pointerCoordinates: [], // 存每個圖片的指針座標
-      scaleStartCoordinate: null, // 存圖片的起始座標
-      scaleEndCoordinate: null, // 存圖片的結束座標
-      scaleStartValue: null,
-      scaleEndValue: null,
-      markClass: null, // 存每個圖片的標記類別 (1:起始刻度, 2:結束刻度, 3:指針, 4:圓盤)
+      // scaleStartCoordinate: null, // 存圖片的起始座標
+      // scaleEndCoordinate: null, // 存圖片的結束座標
+      // scaleStartValue: null,
+      // scaleEndValue: null,
+      markClass: null, // 存每個圖片的標記類別 (1:起始刻度, 2:結束刻度, 3:指針, 4:圓盤中心)
       discFrameClick: 1, //1為畫起始點，2為畫結束點
-      discFrameStartCoordinates: [],
-      discFrameEndCoordinates: [],
+      // discFrameStartCoordinates: [],
+      // discFrameEndCoordinates: [],
+      discCenterCoordinate: null,
       getImage: [],
       correctImageIndexs: [], //儲存 正確的SAM候選圖片 的索引 !!未重製!!
     };
@@ -114,14 +115,15 @@ class MarkApp extends Component {
       showImages: [],
       currentImageIndex: 0,
       pointerCoordinates: [], // 存每個圖片的指針座標
-      scaleStartCoordinate: null, // 存圖片的起始座標
-      scaleEndCoordinate: null, // 存圖片的結束座標
-      scaleStartValue: null,
-      scaleEndValue: null,
+      // scaleStartCoordinate: null, // 存圖片的起始座標
+      // scaleEndCoordinate: null, // 存圖片的結束座標
+      // scaleStartValue: null,
+      // scaleEndValue: null,
+      discCenterCoordinate: null,
       markClass: null, // 存每個圖片的標記類別 (1:起始刻度, 2:結束刻度, 3:指針, 4:圓盤)
       discFrameClick: 1, //1為畫起始點，2為畫結束點
-      discFrameStartCoordinates: [],
-      discFrameEndCoordinates: [],
+      // discFrameStartCoordinates: [],
+      // discFrameEndCoordinates: [],
       isModalOpen: false,
     });
   };
@@ -131,12 +133,13 @@ class MarkApp extends Component {
       showImages,
       images,
       pointerCoordinates,
-      scaleStartCoordinate,
-      scaleEndCoordinate,
-      scaleStartValue,
-      scaleEndValue,
-      discFrameStartCoordinates,
-      discFrameEndCoordinates,
+      // scaleStartCoordinate,
+      // scaleEndCoordinate,
+      // scaleStartValue,
+      // scaleEndValue,
+      // discFrameStartCoordinates,
+      // discFrameEndCoordinates,
+      discCenterCoordinate,
     } = this.state;
     //上傳的資料型態
     const formData = new FormData();
@@ -151,23 +154,26 @@ class MarkApp extends Component {
     // for (let i = 0; i < pointerCoordinates?.length; i++) {
     //   formData.append(`pointerCoordinates${i}`, pointerCoordinates[i]);
     // }
-    formData.append(
-      "scaleStartCoordinate",
-      JSON.stringify(scaleStartCoordinate)
-    );
-    formData.append("scaleEndCoordinate", JSON.stringify(scaleEndCoordinate));
-    formData.append("scaleStartValue", scaleStartValue);
-    formData.append("scaleEndValue", scaleEndValue);
+    // formData.append(
+    //   "scaleStartCoordinate",
+    //   JSON.stringify(scaleStartCoordinate)
+    // );
+    // formData.append("scaleEndCoordinate", JSON.stringify(scaleEndCoordinate));
+    // formData.append("scaleStartValue", scaleStartValue);
+    // formData.append("scaleEndValue", scaleEndValue);
     formData.append("pointerCoordinates", JSON.stringify(pointerCoordinates));
+    // formData.append(
+    //   "discFrameStartCoordinates",
+    //   JSON.stringify(discFrameStartCoordinates)
+    // );
+    // formData.append(
+    //   "discFrameEndCoordinates",
+    //   JSON.stringify(discFrameEndCoordinates)
+    // );
     formData.append(
-      "discFrameStartCoordinates",
-      JSON.stringify(discFrameStartCoordinates)
+      "discCenterCoordinate",
+      JSON.stringify(discCenterCoordinate)
     );
-    formData.append(
-      "discFrameEndCoordinates",
-      JSON.stringify(discFrameEndCoordinates)
-    );
-
     // for (let i = 0; i < discFrameStartCoordinates?.length; i++) {
     //   formData.append(
     //     `discFrameStartCoordinates${i}`,
@@ -220,43 +226,45 @@ class MarkApp extends Component {
       pointerCoordinates,
       currentImageIndex,
       markClass,
-      discFrameStartCoordinates,
-      discFrameEndCoordinates,
+      // discFrameStartCoordinates,
+      // discFrameEndCoordinates,
     } = this.state;
 
     switch (markClass) {
-      case 1:
-        this.setState({ scaleStartCoordinate: { x: mouseX, y: mouseY } });
-        break;
-      case 2:
-        this.setState({ scaleEndCoordinate: { x: mouseX, y: mouseY } });
-        break;
+      // case 1:
+      //   this.setState({ scaleStartCoordinate: { x: mouseX, y: mouseY } });
+      //   break;
+      // case 2:
+      //   this.setState({ scaleEndCoordinate: { x: mouseX, y: mouseY } });
+      //   break;
       case 3:
         const updatedCoordinates = [...pointerCoordinates];
         updatedCoordinates[currentImageIndex] = [{ x: mouseX, y: mouseY }];
         this.setState({ pointerCoordinates: updatedCoordinates });
         break;
       case 4:
-        if (this.state.discFrameClick === 1) {
-          const updatedStartCoordinates = [...discFrameStartCoordinates];
-          const updatedEndCoordinates = [...discFrameEndCoordinates];
-          updatedStartCoordinates[currentImageIndex] = [
-            { x: mouseX, y: mouseY },
-          ];
-          updatedEndCoordinates[currentImageIndex] = null;
-          this.setState({
-            discFrameStartCoordinates: updatedStartCoordinates,
-            discFrameEndCoordinates: updatedEndCoordinates,
-            discFrameClick: 2,
-          });
-        } else if (this.state.discFrameClick === 2) {
-          const updatedEndCoordinates = [...discFrameEndCoordinates];
-          updatedEndCoordinates[currentImageIndex] = [{ x: mouseX, y: mouseY }];
-          this.setState({
-            discFrameEndCoordinates: updatedEndCoordinates,
-            discFrameClick: 1,
-          });
-        }
+        // if (this.state.discFrameClick === 1) {
+        //   const updatedStartCoordinates = [...discFrameStartCoordinates];
+        //   const updatedEndCoordinates = [...discFrameEndCoordinates];
+        //   updatedStartCoordinates[currentImageIndex] = [
+        //     { x: mouseX, y: mouseY },
+        //   ];
+        //   updatedEndCoordinates[currentImageIndex] = null;
+        //   this.setState({
+        //     discFrameStartCoordinates: updatedStartCoordinates,
+        //     discFrameEndCoordinates: updatedEndCoordinates,
+        //     discFrameClick: 2,
+        //   });
+        // } else if (this.state.discFrameClick === 2) {
+        //   const updatedEndCoordinates = [...discFrameEndCoordinates];
+        //   updatedEndCoordinates[currentImageIndex] = [{ x: mouseX, y: mouseY }];
+        //   this.setState({
+        //     discFrameEndCoordinates: updatedEndCoordinates,
+        //     discFrameClick: 1,
+        //   });
+        // }
+        // break;
+        this.setState({ discCenterCoordinate: { x: mouseX, y: mouseY } });
         break;
       default:
         break;
@@ -366,12 +374,13 @@ class MarkApp extends Component {
       currentImageIndex,
       pointerCoordinates,
       // fileInputRef,
-      scaleStartCoordinate,
-      scaleEndCoordinate,
-      scaleStartValue,
-      scaleEndValue,
-      discFrameStartCoordinates,
-      discFrameEndCoordinates,
+      // scaleStartCoordinate,
+      // scaleEndCoordinate,
+      // scaleStartValue,
+      // scaleEndValue,
+      // discFrameStartCoordinates,
+      // discFrameEndCoordinates,
+      discCenterCoordinate,
       getImage,
       correctImageIndexs,
     } = this.state;
@@ -447,7 +456,7 @@ class MarkApp extends Component {
                   onClick={this.handleImageClick}
                 />
               )}
-              {currentImageIndex === 0 && scaleStartCoordinate && (
+              {/* {currentImageIndex === 0 && scaleStartCoordinate && (
                 <div
                   className="dot red-dot"
                   style={{
@@ -513,7 +522,8 @@ class MarkApp extends Component {
                         )}
                     </div>
                   )
-                )}
+                )} */}
+
               {pointerCoordinates[currentImageIndex] &&
                 pointerCoordinates[currentImageIndex].map(
                   (coordinate, index) => (
@@ -527,6 +537,15 @@ class MarkApp extends Component {
                     ></div>
                   )
                 )}
+              {currentImageIndex === 0 && discCenterCoordinate && (
+                <div
+                  className="dot blue-dot"
+                  style={{
+                    left: discCenterCoordinate.x,
+                    top: discCenterCoordinate.y,
+                  }}
+                ></div>
+              )}
             </div>
             <div>
               <button
@@ -554,7 +573,7 @@ class MarkApp extends Component {
             </div>
           </div>
           <div>
-            {currentImageIndex === 0 && (
+            {/* {currentImageIndex === 0 && (
               <div>
                 <div className="coordinates-display">
                   <button
@@ -612,13 +631,38 @@ class MarkApp extends Component {
                               })
                             }
                           />
-                          {/* {scaleEndValue !== null && { scaleEndValue }} */}
+                          //{scaleEndValue !== null && { scaleEndValue }}
                           <div>結束刻度值: {scaleEndValue}</div>
                         </div>
                       )}
                       <button
                         onClick={() =>
                           this.setState({ scaleEndCoordinate: null })
+                        }
+                        className="button "
+                      >
+                        删除
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )} */}
+            {currentImageIndex === 0 && (
+              <div>
+                <div className="coordinates-display">
+                  <button
+                    onClick={() => this.setState({ markClass: 4 })}
+                    className="button blue-button "
+                  >
+                    一點標註圓盤中心座標
+                  </button>
+                  {discCenterCoordinate && (
+                    <div>
+                      X: {discCenterCoordinate.x}, Y: {discCenterCoordinate.y}
+                      <button
+                        onClick={() =>
+                          this.setState({ discCenterCoordinate: null })
                         }
                         className="button "
                       >
@@ -653,7 +697,7 @@ class MarkApp extends Component {
                   )
                 )}
             </div>
-            <div className="coordinates-display">
+            {/* <div className="coordinates-display">
               <button
                 onClick={() => this.setState({ markClass: 4 })}
                 className="button blue-button"
@@ -698,7 +742,7 @@ class MarkApp extends Component {
                     </div>
                   )
                 )}
-            </div>
+            </div> */}
           </div>
         </Modal>
       </div>
