@@ -21,13 +21,13 @@ import read.maskrcnn.train as train
 def mark(request):
     imageLength = request.data.get('imageLength')
     returnimage = []
-    scaleStartCoordinate = json.loads(request.data.get('scaleStartCoordinate'))
-    scaleEndCoordinate = json.loads(request.data.get('scaleEndCoordinate'))
-    scaleStartValue = json.loads(request.data.get('scaleStartValue'))
-    scaleEndValue = json.loads(request.data.get('scaleEndValue'))
+    # scaleStartCoordinate = json.loads(request.data.get('scaleStartCoordinate'))
+    # scaleEndCoordinate = json.loads(request.data.get('scaleEndCoordinate'))
+    # scaleStartValue = json.loads(request.data.get('scaleStartValue'))
+    # scaleEndValue = json.loads(request.data.get('scaleEndValue'))
     pointerCoordinates = json.loads(request.data.get('pointerCoordinates'))
-    discFrameStartCoordinates = json.loads(request.data.get('discFrameStartCoordinates'))
-    discFrameEndCoordinates = json.loads(request.data.get('discFrameEndCoordinates'))
+    # discFrameStartCoordinates = json.loads(request.data.get('discFrameStartCoordinates'))
+    # discFrameEndCoordinates = json.loads(request.data.get('discFrameEndCoordinates'))
     for i in range(int(imageLength)):
         image = request.data.get('image'+str(i))
         # 调用read函数并设置gauge_data字段的值
@@ -42,28 +42,27 @@ def mark(request):
         origin_image_bytesio = BytesIO(imagebuffer)
         needleX = pointerCoordinates[i][0]['x']
         needleY = pointerCoordinates[i][0]['y']
-        discFrameStartX = discFrameStartCoordinates[i][0]['x']
-        discFrameStartY = discFrameStartCoordinates[i][0]['y']
-        discFrameEndX = discFrameEndCoordinates[i][0]['x']
-        discFrameEndY = discFrameEndCoordinates[i][0]['y']
+        # discFrameStartX = discFrameStartCoordinates[i][0]['x']
+        # discFrameStartY = discFrameStartCoordinates[i][0]['y']
+        # discFrameEndX = discFrameEndCoordinates[i][0]['x']
+        # discFrameEndY = discFrameEndCoordinates[i][0]['y']
         needlemask,mixneedlemask = getmasks_bypoint(imagenumpy, needleX, needleY)
-        discmask,mixdiscmask = getmasks_bybox(imagenumpy, discFrameStartX, discFrameStartY, discFrameEndX, discFrameEndY)
+        # discmask,mixdiscmask = getmasks_bybox(imagenumpy, discFrameStartX, discFrameStartY, discFrameEndX, discFrameEndY)
         needlemaskKD = []
-        discmaskKD = []
         for j in range(3):
             print(j)
             needlemaskKD.append(getmasks_bypoint_float(imagenumpy, needleX, needleY, j))
-            discmaskKD.append(getmasks_bybox_float(imagenumpy, discFrameStartX, discFrameStartY, discFrameEndX, discFrameEndY, j))
+            # discmaskKD.append(getmasks_bybox_float(imagenumpy, discFrameStartX, discFrameStartY, discFrameEndX, discFrameEndY, j))
         needlemask = np.where(needlemask,255,0)
         discmask = np.where(discmask,255,0)
         for j in range(3):            
             maskrcnn = Maskrcnndata()
-            maskrcnn.startx = scaleStartCoordinate['x']
-            maskrcnn.starty = scaleStartCoordinate['y']
-            maskrcnn.startvalue = scaleStartValue
-            maskrcnn.endx = scaleEndCoordinate['x']
-            maskrcnn.endy = scaleEndCoordinate['y']
-            maskrcnn.endvalue = scaleEndValue
+            # maskrcnn.startx = scaleStartCoordinate['x']
+            # maskrcnn.starty = scaleStartCoordinate['y']
+            # maskrcnn.startvalue = scaleStartValue
+            # maskrcnn.endx = scaleEndCoordinate['x']
+            # maskrcnn.endy = scaleEndCoordinate['y']
+            # maskrcnn.endvalue = scaleEndValue
             # maskrcnn.image.save(f'image_{i}_{j}.jpg', image)
             maskrcnn.image.save(f'image_{i}_{j}.jpg', InMemoryUploadedFile(origin_image_bytesio, None, f'image_{i}_{j}.jpg', 'image/jpeg', len(imagebuffer), None))
             buffer = BytesIO()
@@ -79,33 +78,9 @@ def mark(request):
             buffer = cv2.imencode('.jpg', temp)[1].tobytes()
 
             image_bytesio = BytesIO(buffer)
-            maskrcnn.needlemask.save(f'needlemask_{i}_{j}.jpg', InMemoryUploadedFile(image_bytesio, None, f'needlemask_{i}_{j}.jpg', 'image/jpeg', len(buffer), None))
-            
-        for j in range(3):
-            maskrcnn = Maskrcnndata()
-            maskrcnn.startx = scaleStartCoordinate['x']
-            maskrcnn.starty = scaleStartCoordinate['y']
-            maskrcnn.startvalue = scaleStartValue
-            maskrcnn.endx = scaleEndCoordinate['x']
-            maskrcnn.endy = scaleEndCoordinate['y']
-            maskrcnn.endvalue = scaleEndValue
-            # npyfilename = "maskrcnnFile/trainMask/"+f'discmask_{i}_{j}.npy'
-            # np.save(npyfilename, discmaskKD[j])
-            # maskrcnn.discKD.save(f'discmask_{i}_{j}.npy', InMemoryUploadedFile(open(npyfilename, 'rb'), None, f'discmask_{i}_{j}.npy', 'application/octet-stream', os.path.getsize(npyfilename), None))
-            buffer = BytesIO()
-            np.save(buffer, discmaskKD[j])
-            buffer.seek(0)
-            maskrcnn.discKD.save(f'discmask_{i}_{j}.npy', InMemoryUploadedFile(buffer, None, f'discmask_{i}_{j}.npy', 'application/octet-stream', buffer.tell(), None))
-            temp = mixdiscmask[j].copy()
-            encode_image = cv2.imencode('.jpg', temp)[1]
-            returnimage.append(base64.b64encode(encode_image.tostring()).decode('utf-8'))
-            temp = discmask[j].copy()
-            temp = np.reshape(temp,(temp.shape[0],temp.shape[1],1))
-            buffer = cv2.imencode('.jpg', temp)[1].tobytes()
-            image_bytesio = BytesIO(buffer)
-            maskrcnn.discmask.save(f'discmask_{i}_{j}.jpg', InMemoryUploadedFile(image_bytesio, None, f'discmask_{i}_{j}.jpg', 'image/jpeg', len(buffer), None))
-            
+            maskrcnn.needlemask.save(f'needlemask_{i}_{j}.jpg', InMemoryUploadedFile(image_bytesio, None, f'needlemask_{i}_{j}.jpg', 'image/jpeg', len(buffer), None))           
     return Response({'message': 0,"image":returnimage}, status=status.HTTP_201_CREATED)
+
 def choose_best(request):
     best = request.data.get('correctImageIndexs')
     print(best)
@@ -128,6 +103,7 @@ def choose_best(request):
                 os.remove(maskrcnndata[i].discKD.path)
             maskrcnndata[i].delete()
     return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
+
 def modifyfilename():
     directory = "maskrcnnFile/trainMask/"
     for filename in os.listdir(directory):
@@ -142,6 +118,7 @@ def modifyfilename():
     directory = "maskrcnnFile/trainImage/"
     for filename in os.listdir(directory):
         os.rename(directory+filename, directory+"image"+filename.split('_')[1]+".jpg")
+
 def dataAugmentationMask(directory):
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
@@ -157,6 +134,7 @@ def dataAugmentationMask(directory):
                 rotate_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
                 cv2.imwrite(f.replace("_","-"+str(i)+"_"), rotate_image)
                 image = rotate_image
+
 def dataAugmentationImage(directory):
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
@@ -167,13 +145,14 @@ def dataAugmentationImage(directory):
             rotate_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
             cv2.imwrite(f.replace(".jpg","-"+str(i)+".jpg"), rotate_image)
             image = rotate_image
+
 class MyViewSet(viewsets.ModelViewSet):
     queryset = MyData.objects.all()
     serializer_class = MyDataSerializer
     def create(self, request, *args, **kwargs):
         # 获取POST请求的数据
         print(request.data)
-        if(request.data.get('operation') == 'user_mark2'):
+        if(request.data.get('operation') == 'mark'):
             # return mark(request)
             return
         elif (request.data.get('operation') == 'choose_best'):
@@ -184,19 +163,49 @@ class MyViewSet(viewsets.ModelViewSet):
             train.main()
             return ret
             # return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
+        elif(request.data.get('operation') == 'user_mark2'):
+            scaleStartCoordinate = json.loads(request.data.get('scaleStartCoordinate'))
+            scaleEndCoordinate = json.loads(request.data.get('scaleEndCoordinate'))
+            scaleStartValue = json.loads(request.data.get('scaleStartValue'))
+            scaleEndValue = json.loads(request.data.get('scaleEndValue'))
+            discFrameCoordinates = json.loads(request.data.get('discFrameStartCoordinates'))
+            with open('read/data.txt','w') as f:
+                f.write(str(scaleStartCoordinate['x'])+'\n'+
+                        str(scaleStartCoordinate['y'])+'\n'+
+                        str(scaleStartValue)+'\n'+
+                        str(scaleEndCoordinate['x'])+'\n'+
+                        str(scaleEndCoordinate['y'])+'\n'+
+                        str(scaleEndValue)+'\n'+
+                        str(discFrameCoordinates['x'])+'\n'+
+                        str(discFrameCoordinates['y']))
+                
+            image = request.data.get('image')
+            image_data = image.read()
+            image_array = np.frombuffer(image_data, np.uint8)
+            imagenumpy = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+            height, width, channels = imagenumpy.shape
+            new_width = 400
+            new_height = int(height * new_width / width)
+            imagenumpy = cv2.resize(imagenumpy, (new_width, new_height))
+            cv2.imwrite("read/SIFT/reference.jpg",imagenumpy)
         else:
             image = request.data.get('image')
             # 调用read函数并设置gauge_data字段的值
             image_data = image.read()
             image_array = np.frombuffer(image_data, np.uint8)
             imagenumpy = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-            latest_data = Maskrcnndata.objects.latest('id')
-            startx = latest_data.startx
-            starty = latest_data.starty
-            startvalue = latest_data.startvalue
-            endx = latest_data.endx
-            endy = latest_data.endy
-            endvalue = latest_data.endvalue
+            data = []
+            with open('read/data.txt','r') as f:
+                for line in f:
+                    data.append(int(line))
+            startx = data[0]
+            starty = data[1]
+            startvalue = data[2]
+            endx = data[3]
+            endy = data[4]
+            endvalue = data[5]
+            discx = data[6]
+            discy = data[7]
             height, width, channels = imagenumpy.shape
             new_width = 400
             new_height = int(height * new_width / width)
@@ -204,14 +213,15 @@ class MyViewSet(viewsets.ModelViewSet):
             imagebuffer = cv2.imencode('.jpg', imagenumpy)[1].tobytes()
             image_bytesio = BytesIO(imagebuffer)
             mydata = MyData()
-            result,return_image = read(imagenumpy,startx, starty, startvalue, endx, endy, endvalue)
+            result,return_image = read(imagenumpy,startx, starty, startvalue, endx, endy, endvalue, discx, discy)
             mydata.data = "test"
             mydata.gauge_data=result
             mydata.image.save('image.jpg', InMemoryUploadedFile(image_bytesio, None, 'image.jpg', 'image/jpeg', len(imagebuffer), None))
             encode_image = cv2.imencode('.jpg', return_image)[1]
             returnimage = base64.b64encode(encode_image.tostring()).decode('utf-8')
             return Response({'message':result,'image':returnimage},status=status.HTTP_200_OK, content_type = 'application/json')
-        
+        # else:
+        #     return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
         #計算指針刻度
         # result = read(imagenumpy)
 

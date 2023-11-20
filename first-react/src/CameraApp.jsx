@@ -60,7 +60,7 @@ class CameraApp extends Component {
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
           // 將畫布等比例縮放 寬為400
-          const targetSize = 200;
+          const targetSize = 400;
           const aspectRatio = img.width / img.height;
           canvas.width = targetSize;
           canvas.height = targetSize / aspectRatio;
@@ -110,7 +110,7 @@ class CameraApp extends Component {
     //上傳的資料型態
     const formData = new FormData();
     formData.append("operation", "user_mark2"); //!!API未定
-    formData.append("image", image);
+    formData.append("image", image[0]);
     formData.append(
       "scaleStartCoordinate",
       JSON.stringify(scaleStartCoordinate)
