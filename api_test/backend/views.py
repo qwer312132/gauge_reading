@@ -163,7 +163,7 @@ class MyViewSet(viewsets.ModelViewSet):
             train.main()
             return ret
             # return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
-        elif(request.data.get('operation') == 'user_mark2'):
+        elif(request.data.get('operation') == 'reference'):
             scaleStartCoordinate = json.loads(request.data.get('scaleStartCoordinate'))
             scaleEndCoordinate = json.loads(request.data.get('scaleEndCoordinate'))
             scaleStartValue = json.loads(request.data.get('scaleStartValue'))
