@@ -76,7 +76,7 @@ def mouse_callback(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
         print("Clicked coordinates: ({}, {})".format(x, y))
 
-def read(image,startx, starty, startvalue, endx, endy, endvalue):
+def read(image,startx, starty, startvalue, endx, endy, endvalue,discx,discy):
     
     image = SIFT(image)
     image = cv2.resize(image,(image.shape[1]//4, image.shape[0]//4))
@@ -90,10 +90,10 @@ def read(image,startx, starty, startvalue, endx, endy, endvalue):
     print(pos)
     xmean = int(np.mean(pos[1]))
     ymean = int(np.mean(pos[0]))
-    center_point = np.array([xmean, ymean])
-    print(center_point)
-    center_point = np.array(center_point)
-    center_point[0],center_point[1]=center_point[1],center_point[0]
+    center_point = np.array([discx,discy])
+    # print(center_point)
+    # center_point = np.array(center_point)
+    # center_point[0],center_point[1]=center_point[1],center_point[0]
     needlemask = np.where(needlemask == 0, 0, 1)
 
     pointer_head = version2_distance(needlemask, center_point)

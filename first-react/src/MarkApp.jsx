@@ -69,7 +69,7 @@ class MarkApp extends Component {
           const ctx = canvas.getContext("2d");
 
           // 將畫布等比例縮放 寬為400
-          const targetSize = 200;
+          const targetSize = 400;
           const aspectRatio = img.width / img.height;
           canvas.width = targetSize;
           canvas.height = targetSize / aspectRatio;
