@@ -13,7 +13,7 @@ class CameraApp extends Component {
       scaleStartValue: null,
       scaleEndValue: null,
       markClass: null, // 存每個圖片的標記類別 (1:起始刻度, 2:結束刻度
-
+      discCenterCoordinate: null,
       cameraStream: null,
       intervalId: null,
       gaugeData: "尚未取得資料",
@@ -84,6 +84,9 @@ class CameraApp extends Component {
       case 2:
         this.setState({ scaleEndCoordinate: { x: mouseX, y: mouseY } });
         break;
+      case 3:
+        this.setState({ discCenterCoordinate: { x: mouseX, y: mouseY } });
+        break;
       default:
         break;
     }
@@ -97,6 +100,7 @@ class CameraApp extends Component {
       scaleEndValue: null,
       markClass: null, // 存每個圖片的標記類別 (1:起始刻度, 2:結束刻度, 3:指針, 4:圓盤)
       isModalOpen: false,
+      discCenterCoordinate: null,
     });
   };
   submitModal = () => {
@@ -106,10 +110,11 @@ class CameraApp extends Component {
       scaleEndCoordinate,
       scaleStartValue,
       scaleEndValue,
+      discCenterCoordinate,
     } = this.state;
     //上傳的資料型態
     const formData = new FormData();
-    formData.append("operation", "user_mark2"); //!!API未定
+    formData.append("operation", "reference");
     formData.append("image", image[0]);
     formData.append(
       "scaleStartCoordinate",
@@ -118,6 +123,10 @@ class CameraApp extends Component {
     formData.append("scaleEndCoordinate", JSON.stringify(scaleEndCoordinate));
     formData.append("scaleStartValue", scaleStartValue);
     formData.append("scaleEndValue", scaleEndValue);
+    formData.append(
+      "discCenterCoordinate",
+      JSON.stringify(discCenterCoordinate)
+    );
     fetch("http://127.0.0.1:8000/api/MyData/", {
       method: "POST",
       headers: {},
@@ -222,6 +231,7 @@ class CameraApp extends Component {
       scaleEndCoordinate,
       scaleStartValue,
       scaleEndValue,
+      discCenterCoordinate,
       // compressedImages,
       // currentImageIndex,
       processedImage,
@@ -287,6 +297,15 @@ class CameraApp extends Component {
                   }}
                 ></div>
               )}
+              {discCenterCoordinate && (
+                <div
+                  className="dot blue-dot"
+                  style={{
+                    left: discCenterCoordinate.x,
+                    top: discCenterCoordinate.y,
+                  }}
+                ></div>
+              )}
             </div>
             <div>
               <button onClick={this.closeModal} className="button">
@@ -298,6 +317,31 @@ class CameraApp extends Component {
             </div>
           </div>
           <div>
+            {
+              <div>
+                <div className="coordinates-display">
+                  <button
+                    onClick={() => this.setState({ markClass: 3 })}
+                    className="button blue-button "
+                  >
+                    一點標註圓盤中心座標
+                  </button>
+                  {discCenterCoordinate && (
+                    <div>
+                      X: {discCenterCoordinate.x}, Y: {discCenterCoordinate.y}
+                      <button
+                        onClick={() =>
+                          this.setState({ discCenterCoordinate: null })
+                        }
+                        className="button "
+                      >
+                        删除
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            }
             {
               <div>
                 <div className="coordinates-display">
