@@ -58,11 +58,11 @@ def angle_between_xy_vectors(vector1, vector2):
 
 def calculate_water_meter_reading(center, start_mark, end_mark, pointer_head, start, end):
     # 计算指针指向的角度
-    pointer_angle = angle_between_xy_vectors([-83,21], pointer_head-center)
+    pointer_angle = angle_between_xy_vectors(start-center, pointer_head-center)
     
     print(pointer_angle)
     # 计算开始位置到结束位置的角度
-    start_to_end_angle = angle_between_xy_vectors([-83,21], [-83,20])
+    start_to_end_angle = angle_between_xy_vectors(start-center, end-center)
     print(start_to_end_angle)
     # 计算水表读数
     water_meter_reading = (pointer_angle / start_to_end_angle) * (end_mark - start_mark) + start_mark
@@ -79,17 +79,12 @@ def mouse_callback(event, x, y, flags, param):
 def read(image,startx, starty, startvalue, endx, endy, endvalue,discx,discy):
     
     image = SIFT(image)
-    image = cv2.resize(image,(image.shape[1]//4, image.shape[0]//4))
+    # image = cv2.resize(image,(image.shape[1]//4, image.shape[0]//4))
     needlemask, discmask = eval_show(image)
     needleContours, hierarchy = cv2.findContours(needlemask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     discContours, hierarchy = cv2.findContours(discmask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cv2.drawContours(image, needleContours, -1, (0, 255, 0), 5)
-    cv2.drawContours(image, discContours, -1, (0, 0, 255), 5)
 
-    pos = np.where(discmask)
-    print(pos)
-    xmean = int(np.mean(pos[1]))
-    ymean = int(np.mean(pos[0]))
+
     center_point = np.array([discx,discy])
     # print(center_point)
     # center_point = np.array(center_point)
@@ -97,13 +92,20 @@ def read(image,startx, starty, startvalue, endx, endy, endvalue,discx,discy):
     needlemask = np.where(needlemask == 0, 0, 1)
 
     pointer_head = version2_distance(needlemask, center_point)
+    pointer_head = np.array(pointer_head)
+    pointer_head[0],pointer_head[1]=pointer_head[1],pointer_head[0]
+    cv2.drawContours(image, needleContours, -1, (0, 255, 0), 5)
+    cv2.circle(image, (startx,starty), 5, (0, 0, 255), -1)
+    cv2.circle(image, (endx,endy), 5, (0, 0, 255), -1)
+    cv2.arrowedLine(image, (center_point[0],center_point[1]), (pointer_head[0],pointer_head[1]), (0, 0, 255), 5)
+    # cv2.drawContours(image, discContours, -1, (0, 0, 255), 5)
     # print("Pointer head:", pointer_head)
     # max_points = find_max_distance(mask)
 
     # print("Points:", max_points)
 
-    start_ponit = np.array([startx,starty])
-    end_point = np.array([endx,endy])
+    start_ponit = np.array([starty,startx])
+    end_point = np.array([endy,endx])
 
 
     # 调用函数计算水表读数

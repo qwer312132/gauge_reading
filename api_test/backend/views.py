@@ -35,7 +35,7 @@ def mark(request):
         image_array = np.frombuffer(image_data, np.uint8)
         imagenumpy = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
         height, width, channels = imagenumpy.shape
-        new_width = 200
+        new_width = 400
         new_height = int(height * new_width / width)
         imagenumpy = cv2.resize(imagenumpy, (new_width, new_height))
         imagebuffer = cv2.imencode('.jpg', imagenumpy)[1].tobytes()
@@ -168,7 +168,7 @@ class MyViewSet(viewsets.ModelViewSet):
             scaleEndCoordinate = json.loads(request.data.get('scaleEndCoordinate'))
             scaleStartValue = json.loads(request.data.get('scaleStartValue'))
             scaleEndValue = json.loads(request.data.get('scaleEndValue'))
-            discFrameCoordinates = json.loads(request.data.get('discFrameStartCoordinates'))
+            discFrameCoordinates = json.loads(request.data.get('discCenterCoordinate'))
             with open('read/data.txt','w') as f:
                 f.write(str(scaleStartCoordinate['x'])+'\n'+
                         str(scaleStartCoordinate['y'])+'\n'+
@@ -206,6 +206,7 @@ class MyViewSet(viewsets.ModelViewSet):
             endvalue = data[5]
             discx = data[6]
             discy = data[7]
+            print(startx,starty,startvalue,endx,endy,endvalue,discx,discy)
             height, width, channels = imagenumpy.shape
             new_width = 400
             new_height = int(height * new_width / width)
@@ -214,6 +215,9 @@ class MyViewSet(viewsets.ModelViewSet):
             image_bytesio = BytesIO(imagebuffer)
             mydata = MyData()
             result,return_image = read(imagenumpy,startx, starty, startvalue, endx, endy, endvalue, discx, discy)
+            # cv2.imshow("return_image",return_image)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
             mydata.data = "test"
             mydata.gauge_data=result
             mydata.image.save('image.jpg', InMemoryUploadedFile(image_bytesio, None, 'image.jpg', 'image/jpeg', len(imagebuffer), None))
@@ -235,4 +239,3 @@ class MyViewSet(viewsets.ModelViewSet):
 class MaskrcnndataViewset(viewsets.ModelViewSet):
     queryset = Maskrcnndata.objects.all()
     serializer_class = MaskrcnndataSerializer
-    
