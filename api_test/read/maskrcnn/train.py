@@ -47,13 +47,6 @@ class PennFudanDataset(object):
                 teacher_masks.append(np.load(mask_path))
                 # teacher_masks = torch.as_tensor(teacher_masks, dtype=torch.uint8)
                 continue
-            elif i == 2:
-                mask_path = mask_path.replace("_1.npy","_2.jpg")
-            elif i == 3:
-                mask_path = mask_path.replace("_2.jpg","_3.npy")
-                teacher_masks.append(np.load(mask_path))
-                # teacher_masks = torch.as_tensor(teacher_masks, dtype=torch.uint8)
-                continue
             original_mask = Image.open(mask_path).convert("1")
             np.reshape(original_mask,(img.size[0],img.size[1]))
             # original_mask.show()
@@ -150,7 +143,7 @@ def main():
     # device = torch.device('cpu')
 
     # our dataset has two classes only - background and person
-    num_classes = 3
+    num_classes = 2
     # use our dataset and defined transformations
     dataset = PennFudanDataset('maskrcnnFile', get_transform(train=True), num_classes)
     dataset_test = PennFudanDataset('maskrcnnFile', get_transform(train=False), num_classes)

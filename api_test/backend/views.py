@@ -10,7 +10,7 @@ from rest_framework import status
 import cv2
 import os
 from read.read import read
-# from SAM.detect_mask import getmasks_bypoint, getmasks_bybox, getmasks_bypoint_float, getmasks_bybox_float
+from SAM.detect_mask import getmasks_bypoint, getmasks_bybox, getmasks_bypoint_float, getmasks_bybox_float
 import numpy as np
 import base64
 from io import BytesIO
@@ -54,7 +54,7 @@ def mark(request):
             needlemaskKD.append(getmasks_bypoint_float(imagenumpy, needleX, needleY, j))
             # discmaskKD.append(getmasks_bybox_float(imagenumpy, discFrameStartX, discFrameStartY, discFrameEndX, discFrameEndY, j))
         needlemask = np.where(needlemask,255,0)
-        discmask = np.where(discmask,255,0)
+        # discmask = np.where(discmask,255,0)
         for j in range(3):            
             maskrcnn = Maskrcnndata()
             # maskrcnn.startx = scaleStartCoordinate['x']
@@ -153,16 +153,20 @@ class MyViewSet(viewsets.ModelViewSet):
         # 获取POST请求的数据
         print(request.data)
         if(request.data.get('operation') == 'mark'):
-            # return mark(request)
-            return
+            return mark(request)
+            # return
         elif (request.data.get('operation') == 'choose_best'):
-            ret = choose_best(request)
-            modifyfilename()
-            dataAugmentationMask("maskrcnnFile/trainMask/")
-            dataAugmentationImage("maskrcnnFile/trainImage/")
+            # ret = choose_best(request)
+            # modifyfilename()
+            # dataAugmentationMask("maskrcnnFile/trainMask/")
+            # dataAugmentationImage("maskrcnnFile/trainImage/")
+            import time
+            start = time.time()
             train.main()
-            return ret
-            # return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
+            end = time.time()
+            print(end-start)#127.6431634426117
+            # return ret
+            return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
         elif(request.data.get('operation') == 'reference'):
             scaleStartCoordinate = json.loads(request.data.get('scaleStartCoordinate'))
             scaleEndCoordinate = json.loads(request.data.get('scaleEndCoordinate'))
